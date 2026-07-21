@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#17230f" />
+  <title>REAL CRAFT</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: rgba(16, 24, 14, .82);
+      --line: rgba(255,255,255,.18);
+      --accent: #9bcf63;
+      --danger: #e37866;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #87b9d7; font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; }
+    canvas { display: block; touch-action: none; }
+    button { font: inherit; }
+    .hidden { display: none !important; }
+
+    #titleScreen, #pauseScreen {
+      position: fixed; inset: 0; z-index: 30;
+      display: grid; place-items: center;
+      background:
+        linear-gradient(rgba(10,18,8,.25), rgba(10,18,8,.72)),
+        radial-gradient(circle at 50% 20%, #9bd0e7 0%, #5e9e74 52%, #24351d 100%);
+    }
+    .menu {
+      width: min(92vw, 520px);
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 24px 80px rgba(0,0,0,.35);
+      text-align: center;
+    }
+    .logo {
+      margin: 0 0 4px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      font-size: clamp(42px, 10vw, 78px);
+      text-shadow: 0 5px 0 rgba(0,0,0,.25);
+    }
+    .subtitle { opacity: .72; margin-bottom: 24px; }
+    .menu button {
+      width: 100%; margin-top: 12px; padding: 15px 16px;
+      border: 1px solid var(--line); border-radius: 14px;
+      color: white; background: rgba(255,255,255,.08);
+      font-weight: 700;
+    }
+    .menu button.primary { background: var(--accent); color: #14200d; border: none; }
+    .menu button:active { transform: scale(.98); }
+
+    #hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+    #crosshair {
+      position: absolute; left: 50%; top: 50%; width: 20px; height: 20px;
+      transform: translate(-50%,-50%);
+    }
+    #crosshair::before, #crosshair::after {
+      content: ""; position: absolute; background: rgba(255,255,255,.95); box-shadow: 0 0 2px #000;
+    }
+    #crosshair::before { width: 2px; height: 20px; left: 9px; }
+    #crosshair::after { height: 2px; width: 20px; top: 9px; }
+
+    #topBar {
+      position: absolute; top: max(12px, env(safe-area-inset-top)); left: 12px; right: 12px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+    }
+    .pill {
+      padding: 9px 12px; border-radius: 13px; color: white;
+      background: rgba(0,0,0,.42); border: 1px solid rgba(255,255,255,.15);
+      backdrop-filter: blur(8px); font-size: 13px;
+    }
+    #pauseBtn { pointer-events: auto; border: 0; color: white; min-width: 44px; min-height: 44px; font-size: 20px; }
+
+    #hotbar {
+      position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex; gap: 5px;
+      pointer-events: auto;
+    }
+    .slot {
+      width: clamp(42px, 8vw, 58px); height: clamp(42px, 8vw, 58px);
+      border: 2px solid rgba(255,255,255,.35);
+      border-radius: 10px; background: rgba(0,0,0,.48);
+      color: white; display: grid; place-items: center;
+      font-size: 11px; text-shadow: 0 1px 2px #000;
+    }
+    .slot.selected { outline: 3px solid white; transform: translateY(-5px); }
+    .blockIcon { width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,.3); margin-bottom: 2px; }
+
+    #mobileControls { position: fixed; inset: 0; z-index: 15; pointer-events: none; }
+    #movePad {
+      position: absolute; left: 18px; bottom: max(88px, calc(env(safe-area-inset-bottom) + 82px));
+      width: 142px; height: 142px; border-radius: 50%;
+      background: rgba(0,0,0,.24); border: 1px solid rgba(255,255,255,.25);
+      pointer-events: auto; touch-action: none;
+    }
+    #moveKnob {
+      position: absolute; left: 46px; top: 46px; width: 50px; height: 50px;
+      border-radius: 50%; background: rgba(255,255,255,.62);
+    }
+    #lookZone {
+      position: absolute; inset: 0 0 0 38%;
+      pointer-events: auto; touch-action: none;
+    }
+    .action {
+      position: absolute; pointer-events: auto; touch-action: none;
+      width: 62px; height: 62px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(0,0,0,.42); color: white; font-weight: 800;
+    }
+    #jumpBtn { right: 22px; bottom: max(100px, calc(env(safe-area-inset-bottom) + 96px)); }
+    #breakBtn { right: 92px; bottom: max(28px, calc(env(safe-area-inset-bottom) + 24px)); }
+    #placeBtn { right: 18px; bottom: max(28px, calc(env(safe-area-inset-bottom) + 24px)); }
+    #message {
+      position: absolute; left: 50%; top: 20%;
+      transform: translateX(-50%);
+      padding: 10px 14px; border-radius: 12px;
+      background: rgba(0,0,0,.55); color: white;
+      opacity: 0; transition: opacity .2s;
+    }
+    #message.show { opacity: 1; }
+    @media (pointer:fine) {
+      #mobileControls { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="titleScreen">
+    <section class="menu">
+      <h1 class="logo">REAL CRAFT</h1>
+      <div class="subtitle">α version 0.1 — iPad / PC</div>
+      <button id="newGameBtn" class="primary" type="button">はじめから</button>
+      <button id="continueBtn" type="button">つづきから</button>
+      <button id="howBtn" type="button">操作方法</button>
+      <p id="howText" class="hidden" style="text-align:left;line-height:1.7;opacity:.86">
+        PC：WASDで移動、スペースでジャンプ、マウスで視点。左クリックで破壊、右クリックで設置。<br>
+        iPad：左スティックで移動、右側をドラッグして視点。破壊・設置・ジャンプボタンを使用。
+      </p>
+    </section>
+  </div>
+
+  <div id="pauseScreen" class="hidden">
+    <section class="menu">
+      <h2>ポーズ</h2>
+      <button id="resumeBtn" class="primary" type="button">ゲームに戻る</button>
+      <button id="saveBtn" type="button">セーブする</button>
+      <button id="titleBtn" type="button">タイトルへ戻る</button>
+    </section>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div id="crosshair"></div>
+    <div id="topBar">
+      <div class="pill"><strong>REAL CRAFT</strong><br><span id="coords">X 0 / Y 0 / Z 0</span></div>
+      <button id="pauseBtn" class="pill" type="button">Ⅱ</button>
+    </div>
+    <div id="message">保存しました</div>
+    <div id="hotbar"></div>
+  </div>
+
+  <div id="mobileControls" class="hidden">
+    <div id="lookZone"></div>
+    <div id="movePad"><div id="moveKnob"></div></div>
+    <button id="jumpBtn" class="action" type="button">跳</button>
+    <button id="breakBtn" class="action" type="button">破壊</button>
+    <button id="placeBtn" class="action" type="button">設置</button>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js/+esm";
+
+    const SAVE_KEY = "real-craft-save-v1";
+    const titleScreen = document.querySelector("#titleScreen");
+    const pauseScreen = document.querySelector("#pauseScreen");
+    const hud = document.querySelector("#hud");
+    const mobileControls = document.querySelector("#mobileControls");
+    const coords = document.querySelector("#coords");
+    const message = document.querySelector("#message");
+    const hotbar = document.querySelector("#hotbar");
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x8ec9ed);
+    scene.fog = new THREE.Fog(0x8ec9ed, 28, 80);
+
+    const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.08, 120);
+    camera.rotation.order = "YXZ";
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.prepend(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xcbe8ff, 0x4d5238, 1.7));
+    const sun = new THREE.DirectionalLight(0xfff0ca, 2.3);
+    sun.position.set(18, 30, 12);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    scene.add(sun);
+
+    const blockTypes = [
+      { id: "grass", label: "草", color: 0x679e45 },
+      { id: "dirt", label: "土", color: 0x8c5c38 },
+      { id: "stone", label: "石", color: 0x777b80 },
+      { id: "wood", label: "木", color: 0x825536 },
+      { id: "sand", label: "砂", color: 0xd0bd79 }
+    ];
+    let selectedType = 0;
+    const materials = Object.fromEntries(blockTypes.map(t => [
+      t.id,
+      new THREE.MeshLambertMaterial({ color: t.color })
+    ]));
+    const geo = new THREE.BoxGeometry(1, 1, 1);
+    const blocks = new Map();
+    const group = new THREE.Group();
+    scene.add(group);
+
+    function blockKey(x, y, z) { return `${x},${y},${z}`; }
+
+    function addBlock(x, y, z, type = "grass") {
+      const key = blockKey(x, y, z);
+      if (blocks.has(key)) return false;
+      const mesh = new THREE.Mesh(geo, materials[type] || materials.grass);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.userData = { x, y, z, type };
+      group.add(mesh);
+      blocks.set(key, mesh);
+      return true;
+    }
+
+    function removeBlock(mesh) {
+      const { x, y, z } = mesh.userData;
+      if (y <= -2) return false;
+      blocks.delete(blockKey(x, y, z));
+      group.remove(mesh);
+      return true;
+    }
+
+    function generateWorld() {
+      for (const mesh of [...group.children]) group.remove(mesh);
+      blocks.clear();
+      const size = 18;
+      for (let x = -size; x <= size; x++) {
+        for (let z = -size; z <= size; z++) {
+          const h = Math.floor(
+            Math.sin(x * .28) * 1.1 +
+            Math.cos(z * .25) * .9 +
+            Math.sin((x + z) * .12) * .8
+          );
+          for (let y = -3; y <= h; y++) {
+            const type = y === h ? "grass" : y > h - 2 ? "dirt" : "stone";
+            addBlock(x, y, z, type);
+          }
+          if ((x * 31 + z * 17) % 89 === 0 && h >= 0 && Math.abs(x) > 3) {
+            for (let y = h + 1; y <= h + 4; y++) addBlock(x, y, z, "wood");
+          }
+        }
+      }
+    }
+
+    const player = {
+      pos: new THREE.Vector3(0, 6, 8),
+      vel: new THREE.Vector3(),
+      yaw: 0,
+      pitch: -0.12,
+      onGround: false
+    };
+    const keys = {};
+    let running = false;
+    let paused = false;
+    let last = performance.now();
+    let moveX = 0, moveY = 0;
+
+    function renderHotbar() {
+      hotbar.innerHTML = "";
+      blockTypes.forEach((type, i) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "slot" + (i === selectedType ? " selected" : "");
+        button.innerHTML = `<span><span class="blockIcon" style="display:block;background:#${type.color.toString(16).padStart(6,"0")}"></span>${i + 1} ${type.label}</span>`;
+        button.addEventListener("click", () => { selectedType = i; renderHotbar(); });
+        hotbar.append(button);
+      });
+    }
+
+    function startGame(loadSave) {
+      if (loadSave && !loadGame()) {
+        generateWorld();
+        resetPlayer();
+      } else if (!loadSave) {
+        generateWorld();
+        resetPlayer();
+      }
+      renderHotbar();
+      titleScreen.classList.add("hidden");
+      pauseScreen.classList.add("hidden");
+      hud.classList.remove("hidden");
+      mobileControls.classList.remove("hidden");
+      running = true;
+      paused = false;
+      last = performance.now();
+      if (matchMedia("(pointer:fine)").matches) renderer.domElement.requestPointerLock?.();
+    }
+
+    function resetPlayer() {
+      player.pos.set(0, 7, 8);
+      player.vel.set(0, 0, 0);
+      player.yaw = 0;
+      player.pitch = -0.12;
+    }
+
+    function saveGame() {
+      const data = {
+        version: 1,
+        player: {
+          x: player.pos.x, y: player.pos.y, z: player.pos.z,
+          yaw: player.yaw, pitch: player.pitch
+        },
+        blocks: [...blocks.values()].map(m => m.userData)
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      flash("保存しました");
+    }
+
+    function loadGame() {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return false;
+      try {
+        const data = JSON.parse(raw);
+        for (const mesh of [...group.children]) group.remove(mesh);
+        blocks.clear();
+        data.blocks.forEach(b => addBlock(b.x, b.y, b.z, b.type));
+        Object.assign(player.pos, { x: data.player.x, y: data.player.y, z: data.player.z });
+        player.yaw = data.player.yaw || 0;
+        player.pitch = data.player.pitch || 0;
+        player.vel.set(0,0,0);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function flash(text) {
+      message.textContent = text;
+      message.classList.add("show");
+      clearTimeout(flash.timer);
+      flash.timer = setTimeout(() => message.classList.remove("show"), 1300);
+    }
+
+    function setPause(value) {
+      paused = value;
+      pauseScreen.classList.toggle("hidden", !value);
+      if (!value && matchMedia("(pointer:fine)").matches) renderer.domElement.requestPointerLock?.();
+      if (value) document.exitPointerLock?.();
+    }
+
+    const raycaster = new THREE.Raycaster();
+    function targetBlock() {
+      raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+      const hits = raycaster.intersectObjects(group.children, false);
+      return hits.find(h => h.distance <= 6) || null;
+    }
+    function breakBlock() {
+      const hit = targetBlock();
+      if (hit && removeBlock(hit.object)) flash("ブロックを破壊");
+    }
+    function placeBlock() {
+      const hit = targetBlock();
+      if (!hit) return;
+      const p = hit.object.position.clone().add(hit.face.normal);
+      p.round();
+      const dx = Math.abs(p.x - player.pos.x);
+      const dy = Math.abs(p.y - player.pos.y);
+      const dz = Math.abs(p.z - player.pos.z);
+      if (dx < .8 && dy < 1.8 && dz < .8) return;
+      if (addBlock(p.x, p.y, p.z, blockTypes[selectedType].id)) flash("ブロックを設置");
+    }
+
+    function solidAt(x, y, z) {
+      return blocks.has(blockKey(Math.round(x), Math.round(y), Math.round(z)));
+    }
+    function isGrounded(pos) {
+      return solidAt(pos.x, pos.y - 1.65, pos.z) ||
+             solidAt(pos.x + .25, pos.y - 1.65, pos.z) ||
+             solidAt(pos.x - .25, pos.y - 1.65, pos.z) ||
+             solidAt(pos.x, pos.y - 1.65, pos.z + .25) ||
+             solidAt(pos.x, pos.y - 1.65, pos.z - .25);
+    }
+    function collides(pos) {
+      const ys = [pos.y - 1.3, pos.y - .45, pos.y + .35];
+      const xs = [pos.x - .27, pos.x + .27];
+      const zs = [pos.z - .27, pos.z + .27];
+      for (const y of ys) for (const x of xs) for (const z of zs) {
+        if (solidAt(x, y, z)) return true;
+      }
+      return false;
+    }
+
+    function update(dt) {
+      const f = new THREE.Vector3(Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+      const r = new THREE.Vector3(Math.cos(player.yaw), 0, Math.sin(player.yaw));
+      let forward = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0) - moveY;
+      let strafe = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + moveX;
+      const wish = f.multiplyScalar(forward).add(r.multiplyScalar(strafe));
+      if (wish.lengthSq() > 1) wish.normalize();
+      const speed = keys.ShiftLeft ? 7.4 : 5.2;
+      player.vel.x = THREE.MathUtils.lerp(player.vel.x, wish.x * speed, Math.min(1, dt * 12));
+      player.vel.z = THREE.MathUtils.lerp(player.vel.z, wish.z * speed, Math.min(1, dt * 12));
+      player.vel.y -= 19 * dt;
+      player.onGround = isGrounded(player.pos);
+      if (player.onGround && player.vel.y < 0) player.vel.y = -0.5;
+
+      const nextX = player.pos.clone(); nextX.x += player.vel.x * dt;
+      if (!collides(nextX)) player.pos.x = nextX.x; else player.vel.x = 0;
+      const nextZ = player.pos.clone(); nextZ.z += player.vel.z * dt;
+      if (!collides(nextZ)) player.pos.z = nextZ.z; else player.vel.z = 0;
+      const nextY = player.pos.clone(); nextY.y += player.vel.y * dt;
+      if (!collides(nextY)) player.pos.y = nextY.y;
+      else {
+        if (player.vel.y < 0) player.onGround = true;
+        player.vel.y = 0;
+      }
+
+      if (player.pos.y < -20) resetPlayer();
+      camera.position.copy(player.pos);
+      camera.rotation.y = player.yaw;
+      camera.rotation.x = player.pitch;
+      coords.textContent = `X ${player.pos.x.toFixed(1)} / Y ${player.pos.y.toFixed(1)} / Z ${player.pos.z.toFixed(1)}`;
+    }
+
+    function jump() {
+      if (player.onGround) {
+        player.vel.y = 7.5;
+        player.onGround = false;
+      }
+    }
+
+    function loop(now) {
+      requestAnimationFrame(loop);
+      const dt = Math.min(.035, (now - last) / 1000);
+      last = now;
+      if (running && !paused) update(dt);
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(loop);
+
+    addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+    addEventListener("keydown", e => {
+      keys[e.code] = true;
+      if (/Digit[1-5]/.test(e.code)) {
+        selectedType = Number(e.code.at(-1)) - 1;
+        renderHotbar();
+      }
+      if (e.code === "Space") jump();
+      if (e.code === "Escape" && running) setPause(!paused);
+    });
+    addEventListener("keyup", e => keys[e.code] = false);
+    addEventListener("mousemove", e => {
+      if (document.pointerLockElement !== renderer.domElement || paused) return;
+      player.yaw -= e.movementX * .0024;
+      player.pitch = THREE.MathUtils.clamp(player.pitch - e.movementY * .0024, -1.48, 1.48);
+    });
+    renderer.domElement.addEventListener("click", () => {
+      if (running && !paused && matchMedia("(pointer:fine)").matches && document.pointerLockElement !== renderer.domElement) {
+        renderer.domElement.requestPointerLock?.();
+      }
+    });
+    renderer.domElement.addEventListener("mousedown", e => {
+      if (!running || paused || document.pointerLockElement !== renderer.domElement) return;
+      if (e.button === 0) breakBlock();
+      if (e.button === 2) placeBlock();
+    });
+    renderer.domElement.addEventListener("contextmenu", e => e.preventDefault());
+
+    document.querySelector("#newGameBtn").addEventListener("click", () => startGame(false));
+    document.querySelector("#continueBtn").addEventListener("click", () => startGame(true));
+    document.querySelector("#howBtn").addEventListener("click", () => document.querySelector("#howText").classList.toggle("hidden"));
+    document.querySelector("#pauseBtn").addEventListener("click", () => setPause(true));
+    document.querySelector("#resumeBtn").addEventListener("click", () => setPause(false));
+    document.querySelector("#saveBtn").addEventListener("click", saveGame);
+    document.querySelector("#titleBtn").addEventListener("click", () => {
+      saveGame();
+      running = false;
+      setPause(false);
+      hud.classList.add("hidden");
+      mobileControls.classList.add("hidden");
+      titleScreen.classList.remove("hidden");
+    });
+
+    document.querySelector("#jumpBtn").addEventListener("pointerdown", jump);
+    document.querySelector("#breakBtn").addEventListener("pointerdown", breakBlock);
+    document.querySelector("#placeBtn").addEventListener("pointerdown", placeBlock);
+
+    const lookZone = document.querySelector("#lookZone");
+    let lookId = null, lastLookX = 0, lastLookY = 0;
+    lookZone.addEventListener("pointerdown", e => {
+      lookId = e.pointerId; lastLookX = e.clientX; lastLookY = e.clientY;
+      lookZone.setPointerCapture(e.pointerId);
+    });
+    lookZone.addEventListener("pointermove", e => {
+      if (e.pointerId !== lookId || paused) return;
+      const dx = e.clientX - lastLookX, dy = e.clientY - lastLookY;
+      lastLookX = e.clientX; lastLookY = e.clientY;
+      player.yaw -= dx * .006;
+      player.pitch = THREE.MathUtils.clamp(player.pitch - dy * .006, -1.48, 1.48);
+    });
+    lookZone.addEventListener("pointerup", e => { if (e.pointerId === lookId) lookId = null; });
+    lookZone.addEventListener("pointercancel", e => { if (e.pointerId === lookId) lookId = null; });
+
+    const movePad = document.querySelector("#movePad");
+    const moveKnob = document.querySelector("#moveKnob");
+    let moveId = null;
+    function updateMove(e) {
+      const rect = movePad.getBoundingClientRect();
+      let dx = e.clientX - (rect.left + rect.width / 2);
+      let dy = e.clientY - (rect.top + rect.height / 2);
+      const max = rect.width * .32;
+      const len = Math.hypot(dx, dy) || 1;
+      if (len > max) { dx = dx / len * max; dy = dy / len * max; }
+      moveX = dx / max; moveY = dy / max;
+      moveKnob.style.transform = `translate(${dx}px,${dy}px)`;
+    }
+    movePad.addEventListener("pointerdown", e => {
+      moveId = e.pointerId; movePad.setPointerCapture(e.pointerId); updateMove(e);
+    });
+    movePad.addEventListener("pointermove", e => { if (e.pointerId === moveId) updateMove(e); });
+    function resetMove(e) {
+      if (e.pointerId !== moveId) return;
+      moveId = null; moveX = 0; moveY = 0; moveKnob.style.transform = "";
+    }
+    movePad.addEventListener("pointerup", resetMove);
+    movePad.addEventListener("pointercancel", resetMove);
+
+    generateWorld();
+    resetPlayer();
+    renderHotbar();
+  </script>
+</body>
+</html>
