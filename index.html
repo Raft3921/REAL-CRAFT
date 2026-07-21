@@ -1,971 +1,162 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-  <meta name="theme-color" content="#0f1620" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#101722">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>REAL CRAFT</title>
   <style>
     :root{
-      color-scheme: dark;
-      --gold:#d7b979;
-      --ink:#0d1218;
-      --panel:rgba(10,16,24,.78);
-      --panel2:rgba(14,22,32,.9);
-      --line:rgba(255,255,255,.14);
-      --accent:#74d3ff;
-      --life:#dd635a;
-      --mana:#69c1ff;
-      --xp:#8fd26d;
-      --text:#f0ede7;
+      color-scheme:dark;--panel:rgba(12,19,29,.78);--panel-strong:rgba(8,14,23,.92);
+      --line:rgba(255,255,255,.15);--gold:#e8cf91;--life:#ef6d65;--hunger:#e0aa55;
+      --thirst:#59c8ff;--stamina:#84dd75;--mental:#b794f6;--health:#f3d66a
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0c1117;color:var(--text);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
-    canvas{display:block;touch-action:none}
-    button,input{font:inherit}
-    .hidden{display:none!important}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0b1017;color:#fff;font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif}
+    canvas{display:block;touch-action:none}button{font:inherit}.hidden{display:none!important}
+    .panel{border:1px solid var(--line);background:var(--panel-strong);backdrop-filter:blur(12px);border-radius:20px;padding:18px;box-shadow:0 18px 55px rgba(0,0,0,.35)}
+    .hudbtn{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.07);color:#fff;padding:10px 13px;font-weight:800}
 
-    #titleScreen,#pauseScreen,#loadingScreen,#helpOverlay,#inventoryOverlay,#craftOverlay,#settingsOverlay{
-      position:fixed;inset:0;z-index:50;
-    }
-    #loadingScreen{display:grid;place-items:center;background:#071018}
-    #loadingBox{padding:28px 36px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+    #titleScreen{position:fixed;inset:0;z-index:50;background:#05080d url("./assets/title-bg.png") center/cover no-repeat}
+    .title-hit{position:absolute;border:0;background:transparent;color:transparent;cursor:pointer;border-radius:14px}
+    .title-hit:focus-visible{outline:4px solid #fff4b2;background:rgba(255,244,178,.08)}
+    #hitNew{left:3.2%;top:34%;width:21.8%;height:7.4%}#hitContinue{left:3.2%;top:42%;width:21.8%;height:7.2%}
+    #hitWorld{left:3.2%;top:50%;width:21.8%;height:7.2%}#hitSettings{left:3.2%;top:58%;width:21.8%;height:7.2%}
+    #hitHow{left:3.2%;top:66%;width:21.8%;height:7.2%}#hitCredits{left:3.2%;top:74%;width:21.8%;height:7.2%}
+    #buildTag{position:absolute;right:1.5%;bottom:1.2%;padding:7px 10px;border-radius:10px;background:rgba(0,0,0,.58);font-size:12px;color:#f4dfaa;border:1px solid rgba(244,223,170,.35)}
 
-    #titleScreen{
-      display:grid;place-items:center;
-      background:
-        linear-gradient(rgba(3,8,14,.28), rgba(3,8,14,.78)),
-        url('./assets/title-bg.png') center/cover no-repeat;
-    }
-    .titleWrap{
-      width:min(96vw,1320px);
-      height:min(92vh,760px);
-      padding:20px;
-      border:1px solid rgba(215,185,121,.35);
-      background:rgba(8,10,16,.16);
-      box-shadow:inset 0 0 0 2px rgba(215,185,121,.08), 0 30px 100px rgba(0,0,0,.35);
-      position:relative;
-    }
-    .titleTop,.titleBottom{display:flex;justify-content:space-between;align-items:center}
-    .miniBadge{
-      background:rgba(8,13,20,.72);border:1px solid rgba(215,185,121,.5);color:#eed8a3;
-      padding:10px 16px;border-radius:13px;font-weight:700;box-shadow:0 0 0 2px rgba(215,185,121,.08) inset;
-    }
-    .gameLogo{
-      text-align:center;margin-top:36px;
-      font-size:clamp(54px,10vw,140px);font-weight:1000;letter-spacing:.07em;
-      color:#d8c3a0;text-shadow:0 5px 0 rgba(0,0,0,.35),0 0 20px rgba(0,0,0,.25);
-    }
-    .tagline{margin-top:6px;text-align:center;letter-spacing:.18em;color:#f6e6b8;font-weight:700;text-shadow:0 2px 5px rgba(0,0,0,.5)}
-    .titleLayout{
-      position:absolute;left:20px;right:20px;bottom:110px;top:160px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;
-    }
-    .menuCol{width:min(360px,34vw)}
-    .menuBtn{
-      width:100%;display:flex;align-items:center;gap:12px;margin:10px 0;padding:18px 18px;
-      border-radius:16px;border:1px solid rgba(215,185,121,.45);background:rgba(7,15,26,.78);color:#fff;font-size:18px;font-weight:800;
-      box-shadow:0 0 0 2px rgba(215,185,121,.08) inset;
-    }
-    .menuBtn.primary{outline:3px solid rgba(252,215,111,.32);background:rgba(22,36,56,.88)}
-    .menuBtn small{opacity:.75;font-weight:600}
-    .saveCard{
-      width:min(330px,32vw);padding:18px;border-radius:18px;background:rgba(8,13,22,.74);border:1px solid rgba(215,185,121,.45);backdrop-filter:blur(10px)
-    }
-    .saveCard h3{margin:0 0 12px;color:#f1dda8}
-    .saveThumb{aspect-ratio:4/3;border-radius:12px;background:linear-gradient(145deg,#315271,#15222e);margin-bottom:12px;position:relative;overflow:hidden}
-    .saveThumb::after{content:"";position:absolute;inset:20% 18%;background:linear-gradient(#8dc6ff,#4f83b7);clip-path:polygon(50% 0,100% 40%,72% 100%,28% 100%,0 40%)}
-    .saveMeta{font-size:14px;line-height:1.8;color:#e8edf4}
-    .bottomText{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);font-size:22px;color:#e2d2af;text-shadow:0 2px 5px rgba(0,0,0,.6)}
+    .overlay{position:fixed;inset:0;z-index:55;background:rgba(3,7,12,.67);backdrop-filter:blur(10px);display:grid;place-items:center;padding:16px}
+    .overlay .panel{width:min(1040px,96vw);max-height:90vh;overflow:auto}
+    .overlay-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.overlay h2{margin:0}
+    .world-grid,.catalog-grid,.system-grid,.bestiary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px}
+    .world-card,.catalog-card,.system-card,.mob-card{border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:15px;padding:13px;text-align:left;color:#fff}
+    .world-card.active{border-color:#7ee2ff;background:rgba(126,226,255,.12)}
+    .world-card strong,.catalog-card strong,.system-card strong,.mob-card strong{display:block;margin-bottom:6px}
+    .world-card small,.catalog-card small,.system-card small,.mob-card small{opacity:.72;line-height:1.45}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid var(--line);background:rgba(255,255,255,.05);color:#fff;padding:9px 11px;border-radius:11px}.tab.active{background:rgba(111,215,255,.18);border-color:#6fd7ff}
 
-    #pauseScreen,#helpOverlay,#inventoryOverlay,#craftOverlay,#settingsOverlay{
-      background:rgba(3,8,14,.62);backdrop-filter:blur(10px);display:grid;place-items:center;
-    }
-    .panel{width:min(92vw,980px);max-height:88vh;overflow:auto;padding:24px;border-radius:22px;background:var(--panel2);border:1px solid var(--line);box-shadow:0 24px 80px rgba(0,0,0,.4)}
-    .panel h2,.panel h3{margin:0 0 12px}
-    .pauseMenu{width:min(460px,90vw)}
-    .pauseMenu button{width:100%;margin:12px 0;padding:16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font-weight:800}
-    .pauseMenu button.primary{background:#88d46d;color:#152311;border:none}
+    #pauseOverlay{position:fixed;inset:0;z-index:54;background:rgba(3,7,12,.62);display:grid;place-items:center}
+    #pauseOverlay .panel{width:min(430px,90vw)}#pauseOverlay button{width:100%;margin-top:10px}
 
     #hud{position:fixed;inset:0;z-index:10;pointer-events:none}
     #crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%)}
-    #crosshair:before,#crosshair:after{content:"";position:absolute;background:rgba(255,255,255,.94);box-shadow:0 0 4px rgba(0,0,0,.8)}
-    #crosshair:before{left:10px;top:0;width:2px;height:22px}
-    #crosshair:after{left:0;top:10px;width:22px;height:2px}
+    #crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff;box-shadow:0 0 3px #000}
+    #crosshair:before{left:10px;top:0;width:2px;height:22px}#crosshair:after{left:0;top:10px;width:22px;height:2px}
+    #topLeft,#topRight{position:absolute;top:max(12px,env(safe-area-inset-top));background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(9px);border-radius:17px;padding:12px}
+    #topLeft{left:12px;width:min(410px,48vw)}#topRight{right:12px;width:min(330px,40vw)}
+    .titleRow{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;font-weight:850}
+    .stat{display:grid;grid-template-columns:68px 1fr 62px;gap:8px;align-items:center;margin:5px 0;font-size:12px}
+    .track{height:10px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}.fill{height:100%;border-radius:999px}
+    #lifeFill{background:var(--life)}#hungerFill{background:var(--hunger)}#thirstFill{background:var(--thirst)}#staminaFill{background:var(--stamina)}#sleepFill{background:#8cb4e8}#mentalFill{background:var(--mental)}#healthFill{background:var(--health)}
+    #rightButtons{display:flex;gap:8px;margin-top:10px;pointer-events:auto;flex-wrap:wrap}#rightButtons button{pointer-events:auto}
+    #hotbarWrap{position:absolute;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;pointer-events:auto}
+    #hint{background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.13);padding:7px 10px;border-radius:11px;font-size:12px}
+    #hotbar{display:flex;gap:5px}.slot{width:62px;height:62px;border:2px solid rgba(255,255,255,.25);border-radius:11px;background:rgba(0,0,0,.48);color:#fff;display:grid;place-items:center;font-size:10px;padding:3px}.slot.selected{outline:3px solid #f7df9b;transform:translateY(-5px)}.slot .ico{font-size:22px;line-height:1}
+    #toast{position:absolute;left:50%;top:18%;transform:translateX(-50%);padding:10px 14px;border-radius:12px;background:rgba(0,0,0,.62);opacity:0;transition:.2s}#toast.show{opacity:1}
 
-    #hudTop{position:absolute;left:14px;right:14px;top:max(14px,env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-    .hudPanel{background:rgba(5,10,16,.55);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:12px 14px;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    #statsBox{min-width:min(430px,58vw)}
-    .statRow{display:flex;align-items:center;gap:10px;margin:7px 0}
-    .label{width:74px;font-size:12px;letter-spacing:.1em;color:#d7e2ef}
-    .bar{flex:1;height:12px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden;position:relative}
-    .fill{height:100%;border-radius:999px}
-    .value{width:58px;text-align:right;font-size:12px;font-weight:800}
-    #lifeFill{background:linear-gradient(90deg,#f07b6e,#cf4f48)}
-    #manaFill{background:linear-gradient(90deg,#8cd9ff,#4caef2)}
-    #xpFill{background:linear-gradient(90deg,#9de37e,#4fb449)}
-    #rightHud{display:flex;gap:12px;align-items:flex-start}
-    #miniInfo{min-width:220px;font-size:13px;line-height:1.65}
-    #gaugeCard{display:flex;align-items:center;gap:12px}
-    #gauge{width:86px;height:86px;border-radius:50%;background:conic-gradient(#79e0ff 0deg,#79e0ff 260deg,rgba(255,255,255,.08) 260deg 360deg);display:grid;place-items:center;box-shadow:inset 0 0 0 10px rgba(255,255,255,.06)}
-    #gaugeInner{width:58px;height:58px;border-radius:50%;background:#0d141c;display:grid;place-items:center;font-weight:900}
-    #topButtons{display:flex;gap:10px;margin-top:10px;pointer-events:auto}
-    .hudBtn{padding:10px 14px;border:none;border-radius:12px;background:rgba(0,0,0,.5);color:white;border:1px solid rgba(255,255,255,.12);font-weight:800;pointer-events:auto}
-
-    #hotbarWrap{position:absolute;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:auto}
-    #contextLine{padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.45);font-size:13px}
-    #hotbar{display:flex;gap:6px}
-    .slot{width:64px;height:64px;border-radius:12px;background:rgba(0,0,0,.46);border:2px solid rgba(255,255,255,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-size:10px;text-align:center;padding:4px}
-    .slot.selected{outline:3px solid #f5e2a5;transform:translateY(-6px)}
-    .slot .icon{width:28px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.2);margin-bottom:4px;display:grid;place-items:center;font-size:17px}
-
-    #mobileControls{position:fixed;inset:0;z-index:15;pointer-events:none}
-    #lookZone{position:absolute;left:38%;top:0;right:0;bottom:0;pointer-events:auto;touch-action:none}
-    #movePad{position:absolute;left:18px;bottom:max(100px,calc(env(safe-area-inset-bottom) + 86px));width:148px;height:148px;border-radius:50%;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.26);pointer-events:auto;touch-action:none}
-    #moveKnob{position:absolute;left:49px;top:49px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.62)}
-    .action{position:absolute;width:64px;height:64px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(0,0,0,.42);color:#fff;font-weight:900;pointer-events:auto;touch-action:none}
-    #jumpBtn{right:24px;bottom:max(112px,calc(env(safe-area-inset-bottom) + 96px))}
-    #breakBtn{right:100px;bottom:max(30px,calc(env(safe-area-inset-bottom) + 20px))}
-    #placeBtn{right:22px;bottom:max(30px,calc(env(safe-area-inset-bottom) + 20px))}
-    #viewBtn{right:178px;bottom:max(30px,calc(env(safe-area-inset-bottom) + 20px))}
-    #attackBtn{right:178px;bottom:max(106px,calc(env(safe-area-inset-bottom) + 96px))}
-    #craftBtn{right:256px;bottom:max(106px,calc(env(safe-area-inset-bottom) + 96px))}
-    #menuBtn{right:256px;bottom:max(30px,calc(env(safe-area-inset-bottom) + 20px))}
-
-    .inventoryGrid{display:grid;grid-template-columns:280px 1fr;gap:18px}
-    .categoryList button{display:block;width:100%;margin-bottom:8px;padding:12px;border-radius:12px;background:rgba(255,255,255,.05);color:white;border:1px solid var(--line);text-align:left;font-weight:800}
-    .categoryList button.active{background:rgba(116,211,255,.15);border-color:rgba(116,211,255,.5)}
-    #inventoryItems{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-    .itemCard{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line);cursor:pointer}
-    .itemCard .cardIcon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;margin-bottom:8px;border:1px solid rgba(255,255,255,.16)}
-    .itemCard strong{display:block;margin-bottom:6px}
-    .itemCard small{display:block;opacity:.76;line-height:1.45}
-
-    .helpGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
-    .helpBlock{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);line-height:1.65}
-
-    #toast{position:absolute;left:50%;top:20%;transform:translateX(-50%);padding:11px 16px;border-radius:14px;background:rgba(0,0,0,.6);opacity:0;transition:opacity .2s}
-    #toast.show{opacity:1}
-
-    @media (pointer:fine){#mobileControls{display:none}}
-    @media (max-width:960px){
-      .titleLayout{top:150px;bottom:90px;align-items:flex-start;flex-direction:column;justify-content:flex-end}
-      .menuCol,.saveCard{width:min(100%,360px)}
-      #statsBox{min-width:unset;width:min(100%,420px)}
-      #hudTop{flex-direction:column}
-      .inventoryGrid{grid-template-columns:1fr}
-    }
+    #mobile{position:fixed;inset:0;z-index:15;pointer-events:none}#lookZone{position:absolute;left:37%;top:0;right:0;bottom:0;pointer-events:auto;touch-action:none}
+    #movePad{position:absolute;left:18px;bottom:max(104px,calc(env(safe-area-inset-bottom) + 88px));width:145px;height:145px;border-radius:50%;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.25);pointer-events:auto;touch-action:none}
+    #moveKnob{position:absolute;left:48px;top:48px;width:49px;height:49px;border-radius:50%;background:rgba(255,255,255,.64)}
+    .action{position:absolute;width:61px;height:61px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(0,0,0,.47);color:#fff;font-weight:900;pointer-events:auto}
+    #jump{right:22px;bottom:max(109px,calc(env(safe-area-inset-bottom) + 96px))}#break{right:91px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}
+    #place{right:20px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}#attack{right:91px;bottom:max(109px,calc(env(safe-area-inset-bottom) + 96px))}
+    #view{right:162px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}#menu{right:233px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}
+    #catalog{right:162px;bottom:max(109px,calc(env(safe-area-inset-bottom) + 96px))}
+    @media(pointer:fine){#mobile{display:none}}@media(max-width:900px){#topLeft{width:45vw}#topRight{width:38vw}.stat{grid-template-columns:55px 1fr 50px;font-size:10px}.slot{width:52px;height:56px}}
   </style>
 </head>
 <body>
-  <div id="loadingScreen"><div id="loadingBox">REAL CRAFT を読み込み中...</div></div>
-
-  <div id="titleScreen" class="hidden">
-    <div class="titleWrap">
-      <div class="titleTop">
-        <div class="miniBadge">お知らせ</div>
-        <div class="miniBadge">Ver.0.4 Alpha</div>
-      </div>
-      <div class="gameLogo">REAL CRAFT</div>
-      <div class="tagline">サバイバル × クラフト × 建築 × 探索 × 魔法</div>
-
-      <div class="titleLayout">
-        <div class="menuCol">
-          <button class="menuBtn primary" id="newGameBtn">⚔️ <span>はじめから</span></button>
-          <button class="menuBtn" id="continueBtn">📜 <span>つづきから</span></button>
-          <button class="menuBtn" id="worldBtn">🗺️ <span>ワールド選択 <small>（現在は1ワールド）</small></span></button>
-          <button class="menuBtn" id="settingsBtn">⚙️ <span>設定</span></button>
-          <button class="menuBtn" id="howBtn">❓ <span>遊び方</span></button>
-          <button class="menuBtn" id="creditsBtn">👥 <span>クレジット</span></button>
-        </div>
-        <div class="saveCard">
-          <h3>最新のセーブデータ</h3>
-          <div class="saveThumb"></div>
-          <div class="saveMeta" id="saveMeta">セーブデータがありません。<br>「はじめから」で新しい世界を作成できます。</div>
-        </div>
-      </div>
-      <div class="bottomText">新しい冒険が、君を待っている。<br><small style="font-size:13px;opacity:.75">BUILD 0.4 — 操作反転修正版</small></div>
-    </div>
+  <div id="titleScreen">
+    <button id="hitNew" class="title-hit" aria-label="はじめから"></button><button id="hitContinue" class="title-hit" aria-label="つづきから"></button>
+    <button id="hitWorld" class="title-hit" aria-label="ワールド選択"></button><button id="hitSettings" class="title-hit" aria-label="設定"></button>
+    <button id="hitHow" class="title-hit" aria-label="遊び方"></button><button id="hitCredits" class="title-hit" aria-label="クレジット"></button>
+    <div id="buildTag">BUILD 0.5 — タイトル当たり判定版</div>
   </div>
 
+  <div id="worldOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>🌍 ワールド選択</h2><div style="opacity:.7">13種類の環境を選択できます。</div></div><button class="hudbtn close">閉じる</button></div><div id="worldGrid" class="world-grid"></div></div></div>
+  <div id="catalogOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>REAL CRAFT カタログ</h2><div id="catalogCount" style="opacity:.7"></div></div><button class="hudbtn close">閉じる</button></div><div id="catalogTabs" class="tabs"></div><div id="catalogGrid" class="catalog-grid"></div></div></div>
+  <div id="systemsOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>⚙️ システム</h2><div style="opacity:.7">今回の基礎実装と、今後の拡張対象を一覧化。</div></div><button class="hudbtn close">閉じる</button></div><div id="systemGrid" class="system-grid"></div></div></div>
+  <div id="bestiaryOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>🐾 動物・モンスター</h2><div style="opacity:.7">現在のワールドへ召喚できます。</div></div><button class="hudbtn close">閉じる</button></div><div id="bestiaryGrid" class="bestiary-grid"></div></div></div>
+  <div id="helpOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><h2>遊び方</h2><button class="hudbtn close">閉じる</button></div><div class="system-grid">
+    <div class="system-card"><strong>iPad</strong><small>左パッド：移動 / 右側ドラッグ：視点 / 跳：ジャンプ / 壊：破壊 / 置：設置 / 攻：攻撃 / 視：視点切替 / 本：カタログ</small></div>
+    <div class="system-card"><strong>PC</strong><small>WASD：移動 / Shift：走る / Space：ジャンプ / 左クリック：破壊 / 右クリック：設置 / F：攻撃 / V：視点 / B：カタログ / M：モブ / Esc：ポーズ</small></div>
+    <div class="system-card"><strong>操作方向</strong><small>標準操作に修正済み。画面を右へ動かすと右を向き、パッドを上へ倒すと前進します。</small></div>
+  </div></div></div>
 
-  <div id="settingsOverlay" class="hidden">
-    <div class="panel" style="max-width:620px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
-        <div>
-          <h2>操作設定</h2>
-          <div style="opacity:.75">反転している操作だけ切り替えてください。</div>
-        </div>
-        <button class="hudBtn" id="closeSettingsBtn">閉じる</button>
-      </div>
-      <div style="display:grid;gap:12px">
-        <button class="menuBtn" id="toggleLookXBtn">視点・左右：通常</button>
-        <button class="menuBtn" id="toggleLookYBtn">視点・上下：通常</button>
-        <button class="menuBtn" id="toggleMoveXBtn">移動・左右：通常</button>
-        <button class="menuBtn" id="toggleMoveYBtn">移動・前後：通常</button>
-        <button class="menuBtn" id="resetControlsBtn">操作設定を初期化</button>
-      </div>
+  <div id="pauseOverlay" class="hidden"><div class="panel"><h2>ポーズ</h2><button class="hudbtn" id="resume">ゲームに戻る</button><button class="hudbtn" id="save">セーブ</button><button class="hudbtn" id="pauseCatalog">カタログ</button><button class="hudbtn" id="pauseWorld">ワールド変更</button><button class="hudbtn" id="toTitle">タイトルへ戻る</button></div></div>
+
+  <div id="hud" class="hidden"><div id="crosshair"></div>
+    <div id="topLeft"><div class="titleRow"><span>レン</span><span id="coords">X 0 / Y 0 / Z 0</span></div>
+      <div class="stat"><span>体力</span><div class="track"><div id="lifeFill" class="fill"></div></div><span id="lifeVal"></span></div>
+      <div class="stat"><span>空腹</span><div class="track"><div id="hungerFill" class="fill"></div></div><span id="hungerVal"></span></div>
+      <div class="stat"><span>喉</span><div class="track"><div id="thirstFill" class="fill"></div></div><span id="thirstVal"></span></div>
+      <div class="stat"><span>スタミナ</span><div class="track"><div id="staminaFill" class="fill"></div></div><span id="staminaVal"></span></div>
+      <div class="stat"><span>睡眠</span><div class="track"><div id="sleepFill" class="fill"></div></div><span id="sleepVal"></span></div>
+      <div class="stat"><span>精神</span><div class="track"><div id="mentalFill" class="fill"></div></div><span id="mentalVal"></span></div>
+      <div class="stat"><span>健康</span><div class="track"><div id="healthFill" class="fill"></div></div><span id="healthVal"></span></div>
     </div>
+    <div id="topRight"><div class="titleRow"><span id="biomeName">草原</span><span id="levelText">Lv.1</span></div><div>経験値：<span id="xpText">0 / 100</span></div><div>属性：火1 / 水1 / 風1 / 土1 / 光1 / 闇1</div><div>周辺モブ：<span id="mobCount">0</span></div><div id="rightButtons"><button class="hudbtn" id="openCatalog">カタログ</button><button class="hudbtn" id="openBestiary">モブ</button><button class="hudbtn" id="openSystems">システム</button><button class="hudbtn" id="openPause">ポーズ</button></div></div>
+    <div id="toast"></div><div id="hotbarWrap"><div id="hint">破壊 / 設置 / 攻撃 / 視点変更が使用できます</div><div id="hotbar"></div></div>
   </div>
 
-  <div id="pauseScreen" class="hidden">
-    <div class="panel pauseMenu">
-      <h2>ポーズ</h2>
-      <button class="primary" id="resumeBtn">ゲームに戻る</button>
-      <button id="saveBtn">セーブする</button>
-      <button id="inventoryBtnPause">インベントリ</button>
-      <button id="craftBtnPause">クラフト</button>
-      <button id="helpBtnPause">遊び方</button>
-      <button id="titleBtn">タイトルへ戻る</button>
-    </div>
-  </div>
-
-  <div id="inventoryOverlay" class="hidden">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
-        <div>
-          <h2>REAL CRAFT インベントリ</h2>
-          <div style="opacity:.75">決まった要素をカテゴリごとにまとめています。選ぶとホットバーに登録されます。</div>
-        </div>
-        <button class="hudBtn" id="closeInventoryBtn">閉じる</button>
-      </div>
-      <div class="inventoryGrid">
-        <div class="categoryList" id="categoryList"></div>
-        <div>
-          <div id="inventoryItems"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="helpOverlay" class="hidden">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
-        <h2>遊び方 / 実装内容</h2>
-        <button class="hudBtn" id="closeHelpBtn">閉じる</button>
-      </div>
-      <div class="helpGrid">
-        <div class="helpBlock"><strong>1. タイトル統一</strong><br>タイトルはすべて <b>REAL CRAFT</b> に統一。タイトル画面も差し替え済み。</div>
-        <div class="helpBlock"><strong>2. レンの両手とHUD</strong><br>一人称時は両手と装備を表示。ライフ / マナ / レベル / スタミナ丸ゲージを搭載。</div>
-        <div class="helpBlock"><strong>3. ブロック系</strong><br>ブロック、鉱石、木材、ガラス、古代ブロック、農地を配置可能。</div>
-        <div class="helpBlock"><strong>4. ツール・武器・設備</strong><br>ツルハシ・斧・剣・杖、作業台・かまど・料理台をホットバー登録可能。</div>
-        <div class="helpBlock"><strong>5. モブ</strong><br>動物モブと敵モブを出現。周囲を歩き回ります。</div>
-        <div class="helpBlock"><strong>6. 属性・魔法・熟練度</strong><br>火 / 水 / 風 / 土 / 光 / 闇の属性熟練度を表示。杖装備中は魔力ゲージを確認可能。</div>
-        <div class="helpBlock"><strong>7. 農業・料理・遺跡</strong><br>畑、料理台、古代遺跡風の建造物をワールドに生成。</div>
-        <div class="helpBlock"><strong>8. 視点切替</strong><br><b>Vキー</b> または画面ボタンで一人称 / 三人称を切替。</div>
-        <div class="helpBlock"><strong>PC操作</strong><br>WASD移動 / Shift走る / Spaceジャンプ / マウス視点 / 左クリック破壊 / 右クリック設置 / Bインベントリ / Cクラフト / F攻撃 / Escポーズ。</div>
-        <div class="helpBlock"><strong>iPad操作</strong><br>左パッド移動 / 右側ドラッグ視点 / 跳=ジャンプ / 壊=破壊 / 置=設置 / 攻=攻撃 / 作=クラフト / 視=視点 / メニュー。</div>
-      </div>
-    </div>
-  </div>
-
-
-  <div id="craftOverlay" class="hidden">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px">
-        <div>
-          <h2>クラフト / 作業設備</h2>
-          <div style="opacity:.75">素材を集めて装備や設備を作成します。</div>
-        </div>
-        <button class="hudBtn" id="closeCraftBtn">閉じる</button>
-      </div>
-      <div id="materialSummary" style="margin-bottom:16px;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)"></div>
-      <div id="craftRecipes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px"></div>
-    </div>
-  </div>
-
-  <div id="hud" class="hidden">
-    <div id="crosshair"></div>
-    <div id="hudTop">
-      <div class="hudPanel" id="statsBox">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><strong>レン</strong><span id="coords">X 0 / Y 0 / Z 0</span></div>
-        <div class="statRow"><div class="label">LIFE</div><div class="bar"><div class="fill" id="lifeFill"></div></div><div class="value" id="lifeVal">100 / 100</div></div>
-        <div class="statRow"><div class="label">MANA</div><div class="bar"><div class="fill" id="manaFill"></div></div><div class="value" id="manaVal">80 / 80</div></div>
-        <div class="statRow"><div class="label">LEVEL</div><div class="bar"><div class="fill" id="xpFill"></div></div><div class="value" id="xpVal">Lv.1</div></div>
-      </div>
-      <div id="rightHud">
-        <div class="hudPanel" id="miniInfo">
-          <div><strong>属性・熟練度</strong></div>
-          <div id="attrText">火1 / 水1 / 風1 / 土1 / 光1 / 闇1</div>
-          <div style="margin-top:8px"><strong>現在装備</strong></div>
-          <div id="equipText">素手</div>
-          <div id="topButtons">
-            <button class="hudBtn" id="openInventoryBtn">インベントリ</button>
-            <button class="hudBtn" id="pauseBtn">ポーズ</button>
-          </div>
-        </div>
-        <div class="hudPanel" id="gaugeCard">
-          <div id="gauge"><div id="gaugeInner"><span id="gaugeVal">72</span></div></div>
-          <div>
-            <strong>スタミナ</strong><br>
-            <span style="opacity:.75">ダッシュ・戦闘で消費</span><br><br>
-            <strong>敵モブ</strong><br>
-            <span id="enemyCount">0 体付近</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="toast">保存しました</div>
-
-    <div id="hotbarWrap">
-      <div id="contextLine">左クリック / 破壊　右クリック / 設置　F / 攻撃　C / クラフト　V / 視点変更</div>
-      <div id="hotbar"></div>
-    </div>
-  </div>
-
-  <div id="mobileControls" class="hidden">
-    <div id="lookZone"></div>
-    <div id="movePad"><div id="moveKnob"></div></div>
-    <button id="jumpBtn" class="action">跳</button>
-    <button id="breakBtn" class="action">壊</button>
-    <button id="placeBtn" class="action">置</button>
-    <button id="viewBtn" class="action">視</button>
-    <button id="attackBtn" class="action">攻</button>
-    <button id="craftBtn" class="action">作</button>
-    <button id="menuBtn" class="action">≡</button>
-  </div>
+  <div id="mobile" class="hidden"><div id="lookZone"></div><div id="movePad"><div id="moveKnob"></div></div><button id="jump" class="action">跳</button><button id="break" class="action">壊</button><button id="place" class="action">置</button><button id="attack" class="action">攻</button><button id="view" class="action">視</button><button id="catalog" class="action">本</button><button id="menu" class="action">≡</button></div>
 
   <script type="module">
     import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js/+esm";
-
-    const SAVE_KEY = 'real-craft-save-v2';
-    const state = {
-      running:false, paused:false, perspective:'first',
-      selectedSlot:0, stamina:72, health:100, maxHealth:100, mana:80, maxMana:80, level:1, xp:24,
-      attributes:{fire:1,water:1,wind:1,earth:1,light:1,dark:1},
-      hotbar:['grass','stone','oak_log','glass','workbench','pickaxe','sword','magic_staff'],
-      inventoryCategory:'blocks',
-      materials:{wood:8,stone:10,iron:2,crystal:1,food:0},
-      mobDrops:{hide:0,meat:0,slimeGel:0,goblinCore:0},
-      crafted:{},
-      invertLookX:false,
-      invertLookY:false,
-      invertMoveX:false,
-      invertMoveY:false,
-    };
-
-    const categoryData = {
-      blocks:{label:'ブロック / 鉱石 / 木材 / ガラス', items:['grass','dirt','stone','oak_log','glass','iron_ore','crystal_ore','ancient_brick']},
-      equipment:{label:'ツール / 武器 / 作業設備', items:['pickaxe','axe','sword','bow','magic_staff','workbench','furnace','cooking_station']},
-      mobs:{label:'動物と敵モブ', items:['mob_cow','mob_deer','mob_boar','mob_wolf','mob_slime','mob_goblin']},
-      magic:{label:'属性 / 魔法 / 熟練度', items:['fire_spell','water_spell','wind_spell','earth_spell','light_spell','dark_spell']},
-      farming:{label:'農業 / 料理', items:['farm_soil','wheat','carrot','berry_bush','cooking_station','water_block']},
-      ruins:{label:'古代文明 / 遺跡', items:['ancient_brick','ancient_pillar','ruin_core','portal_frame','relic_chest']}
-    };
-
-    const itemDefs = {
-      grass:{name:'草ブロック',type:'block',placeable:true,color:0x6ea34c,icon:'🟩',desc:'基本の地面ブロック'},
-      dirt:{name:'土ブロック',type:'block',placeable:true,color:0x7d5538,icon:'🟫',desc:'耕す前の土'},
-      stone:{name:'石ブロック',type:'block',placeable:true,color:0x808892,icon:'⬜',desc:'建築の基礎'},
-      oak_log:{name:'木材ブロック',type:'block',placeable:true,color:0x8d623e,icon:'🪵',desc:'丸太・建材'},
-      glass:{name:'ガラスブロック',type:'block',placeable:true,color:0xaedcff,transparent:true,opacity:.45,icon:'🔷',desc:'透明ブロック'},
-      iron_ore:{name:'鉄鉱石',type:'block',placeable:true,color:0x8d7464,icon:'⛏️',desc:'鉱石ブロック'},
-      crystal_ore:{name:'魔結晶鉱石',type:'block',placeable:true,color:0x7a6bff,emissive:0x3e3aff,icon:'💎',desc:'魔力を秘めた鉱石'},
-      ancient_brick:{name:'古代レンガ',type:'block',placeable:true,color:0x8c8377,icon:'🧱',desc:'遺跡建築用'},
-      farm_soil:{name:'耕地',type:'block',placeable:true,color:0x5b412d,icon:'🌱',desc:'作物用の農地'},
-      wheat:{name:'小麦',type:'decor',placeable:true,color:0xc9b66b,icon:'🌾',desc:'作物オブジェ'},
-      carrot:{name:'にんじん',type:'decor',placeable:true,color:0xe58c32,icon:'🥕',desc:'作物オブジェ'},
-      berry_bush:{name:'ベリーの茂み',type:'decor',placeable:true,color:0x538b42,icon:'🫐',desc:'食材採取ポイント'},
-      water_block:{name:'水ブロック',type:'block',placeable:true,color:0x5cc4ff,transparent:true,opacity:.52,icon:'💧',desc:'液体系ブロック'},
-      workbench:{name:'作業台',type:'workstation',placeable:true,color:0x8e6339,icon:'🪚',desc:'クラフト設備'},
-      furnace:{name:'かまど',type:'workstation',placeable:true,color:0x59595a,icon:'🔥',desc:'精錬設備'},
-      cooking_station:{name:'料理台',type:'workstation',placeable:true,color:0x927152,icon:'🍲',desc:'料理設備'},
-      ancient_pillar:{name:'古代の柱',type:'workstation',placeable:true,color:0x8f8c7f,icon:'🏛️',desc:'遺跡装飾'},
-      ruin_core:{name:'遺跡コア',type:'workstation',placeable:true,color:0x5d6dff,emissive:0x3349ff,icon:'🔮',desc:'遺跡エネルギー炉'},
-      portal_frame:{name:'転移門',type:'workstation',placeable:true,color:0x6c7ea4,icon:'🌀',desc:'古代文明の転移装置'},
-      relic_chest:{name:'古代収納箱',type:'workstation',placeable:true,color:0x776650,icon:'🧰',desc:'遺物保管箱'},
-      pickaxe:{name:'つるはし',type:'tool',placeable:false,icon:'⛏️',desc:'採掘用の基本ツール'},
-      axe:{name:'斧',type:'tool',placeable:false,icon:'🪓',desc:'木材採取用'},
-      sword:{name:'剣',type:'weapon',placeable:false,icon:'🗡️',desc:'近接武器'},
-      bow:{name:'弓',type:'weapon',placeable:false,icon:'🏹',desc:'遠距離武器'},
-      magic_staff:{name:'魔法杖',type:'magic',placeable:false,icon:'✨',desc:'属性魔法を扱う杖'},
-      fire_spell:{name:'火属性',type:'info',placeable:false,icon:'🔥',desc:'攻撃魔法'},
-      water_spell:{name:'水属性',type:'info',placeable:false,icon:'💧',desc:'回復・制御'},
-      wind_spell:{name:'風属性',type:'info',placeable:false,icon:'🌪️',desc:'機動・押し出し'},
-      earth_spell:{name:'土属性',type:'info',placeable:false,icon:'🪨',desc:'防御・建築'},
-      light_spell:{name:'光属性',type:'info',placeable:false,icon:'☀️',desc:'支援・浄化'},
-      dark_spell:{name:'闇属性',type:'info',placeable:false,icon:'🌙',desc:'妨害・吸収'},
-      mob_cow:{name:'ウシ',type:'mobInfo',placeable:false,icon:'🐄',desc:'友好モブ'},
-      mob_deer:{name:'シカ',type:'mobInfo',placeable:false,icon:'🦌',desc:'中立モブ'},
-      mob_boar:{name:'グラッジボーグ',type:'mobInfo',placeable:false,icon:'🐗',desc:'荒々しい獣モブ'},
-      mob_wolf:{name:'ハウリングウルフ',type:'mobInfo',placeable:false,icon:'🐺',desc:'敵性の獣モブ'},
-      mob_slime:{name:'スライム',type:'mobInfo',placeable:false,icon:'🟦',desc:'ゼリー状モブ'},
-      mob_goblin:{name:'フィールドゴブリン',type:'mobInfo',placeable:false,icon:'👹',desc:'敵対ヒューマノイド'}
-    };
-
-
-    const recipes = [
-      {id:'pickaxe', name:'石のつるはし', icon:'⛏️', cost:{wood:2,stone:3}, result:'pickaxe'},
-      {id:'axe', name:'石の斧', icon:'🪓', cost:{wood:2,stone:3}, result:'axe'},
-      {id:'sword', name:'鉄の剣', icon:'🗡️', cost:{wood:1,iron:2}, result:'sword'},
-      {id:'magic_staff', name:'魔法杖', icon:'✨', cost:{wood:2,crystal:1}, result:'magic_staff'},
-      {id:'workbench', name:'作業台', icon:'🪚', cost:{wood:4}, result:'workbench'},
-      {id:'furnace', name:'かまど', icon:'🔥', cost:{stone:8}, result:'furnace'},
-      {id:'cooking_station', name:'料理台', icon:'🍲', cost:{wood:3,stone:2}, result:'cooking_station'},
-      {id:'glass', name:'ガラス ×4', icon:'🔷', cost:{stone:2}, result:'glass', amount:4},
-      {id:'ancient_brick', name:'古代レンガ ×4', icon:'🧱', cost:{stone:3,crystal:1}, result:'ancient_brick', amount:4}
-    ];
-
-    const el = sel => document.querySelector(sel);
-    const titleScreen = el('#titleScreen'), pauseScreen = el('#pauseScreen'), loadingScreen = el('#loadingScreen');
-    const inventoryOverlay = el('#inventoryOverlay'), helpOverlay = el('#helpOverlay'), craftOverlay = el('#craftOverlay'), settingsOverlay = el('#settingsOverlay'), hud = el('#hud'), mobileControls = el('#mobileControls');
-    const hotbarEl = el('#hotbar'), toast = el('#toast');
-    const coordsEl = el('#coords'), equipText = el('#equipText'), attrText = el('#attrText'), enemyCountEl = el('#enemyCount'), saveMeta = el('#saveMeta');
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x8cc5f1);
-    scene.fog = new THREE.Fog(0x8cc5f1, 32, 110);
-
-    const camera = new THREE.PerspectiveCamera(72, innerWidth/innerHeight, 0.05, 180);
-    camera.rotation.order = 'YXZ';
-    const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
-    renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
-    renderer.setSize(innerWidth,innerHeight);
-    renderer.shadowMap.enabled = true;
-    document.body.prepend(renderer.domElement);
-
-    const hemi = new THREE.HemisphereLight(0xd9eeff,0x566041,1.65); scene.add(hemi);
-    const sun = new THREE.DirectionalLight(0xfff0ca,2.4); sun.position.set(24,32,12); sun.castShadow = true; sun.shadow.mapSize.set(1024,1024); scene.add(sun);
-
-    const groundGroup = new THREE.Group(); scene.add(groundGroup);
-    const decorGroup = new THREE.Group(); scene.add(decorGroup);
-    const mobGroup = new THREE.Group(); scene.add(mobGroup);
-
-    const blockGeo = new THREE.BoxGeometry(1,1,1);
-    const halfGeo = new THREE.BoxGeometry(.9,.9,.9);
-    const sphereGeo = new THREE.SphereGeometry(.45,16,14);
-    const raycaster = new THREE.Raycaster();
-    const blockMap = new Map();
-
-    function key(x,y,z){return `${x},${y},${z}`}
-    function makeMaterial(def){
-      const opts = {color:def.color ?? 0x999999};
-      if(def.transparent){ opts.transparent = true; opts.opacity = def.opacity ?? .5; }
-      if(def.emissive) opts.emissive = def.emissive;
-      return new THREE.MeshStandardMaterial(opts);
-    }
-    const materialCache = new Map();
-    function getMaterial(id){
-      if(!materialCache.has(id)) materialCache.set(id, makeMaterial(itemDefs[id] || {color:0x999999}));
-      return materialCache.get(id);
-    }
-
-    function addBlock(x,y,z,id='grass'){
-      const k = key(x,y,z); if(blockMap.has(k)) return null;
-      const def = itemDefs[id] || itemDefs.grass;
-      const mesh = new THREE.Mesh(blockGeo, getMaterial(id));
-      mesh.position.set(x,y,z); mesh.castShadow = true; mesh.receiveShadow = true;
-      mesh.userData = {x,y,z,id,kind:'block'};
-      groundGroup.add(mesh); blockMap.set(k, mesh); return mesh;
-    }
-    function addDecor(x,y,z,id='wheat'){
-      const def = itemDefs[id] || itemDefs.wheat;
-      let mesh;
-      if(id === 'wheat' || id === 'carrot'){
-        mesh = new THREE.Mesh(new THREE.CylinderGeometry(.12,.16,.85,6), new THREE.MeshStandardMaterial({color:def.color}));
-      }else if(id === 'berry_bush'){
-        mesh = new THREE.Mesh(new THREE.SphereGeometry(.45,10,10), new THREE.MeshStandardMaterial({color:def.color}));
-      }else if(id === 'ancient_pillar'){
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(.85,1.65,.85), getMaterial(id));
-      }else if(id === 'portal_frame'){
-        mesh = new THREE.Mesh(new THREE.TorusGeometry(.55,.14,10,20), new THREE.MeshStandardMaterial({color:0x8194c5, emissive:0x3547aa}));
-        mesh.rotation.x = Math.PI/2;
-      }else if(id === 'relic_chest'){
-        mesh = new THREE.Mesh(new THREE.BoxGeometry(.9,.65,.7), getMaterial(id));
-      }else{
-        mesh = new THREE.Mesh(halfGeo, getMaterial(id));
-      }
-      mesh.position.set(x,y,z + (id === 'portal_frame' ? 0 : 0));
-      mesh.castShadow = true; mesh.receiveShadow = true;
-      mesh.userData = {x,y,z,id,kind:'decor'}; decorGroup.add(mesh); return mesh;
-    }
-
-    function clearWorld(){
-      for(const g of [groundGroup,decorGroup,mobGroup]) while(g.children.length) g.remove(g.children[0]);
-      blockMap.clear(); mobs.length = 0;
-    }
-
-    const player = {pos:new THREE.Vector3(0,7,8), vel:new THREE.Vector3(), yaw:0, pitch:-0.14, onGround:false};
-    const keys = {}; let last=performance.now(); let moveX=0, moveY=0;
-
-    function solidAt(x,y,z){ return blockMap.has(key(Math.round(x), Math.round(y), Math.round(z))); }
-    function collides(pos){
-      const ys=[pos.y-1.35,pos.y-.45,pos.y+.35], xs=[pos.x-.28,pos.x+.28], zs=[pos.z-.28,pos.z+.28];
-      for(const y of ys) for(const x of xs) for(const z of zs) if(solidAt(x,y,z)) return true; return false;
-    }
-    function grounded(pos){
-      return solidAt(pos.x,pos.y-1.7,pos.z)||solidAt(pos.x+.25,pos.y-1.7,pos.z)||solidAt(pos.x-.25,pos.y-1.7,pos.z)||solidAt(pos.x,pos.y-1.7,pos.z+.25)||solidAt(pos.x,pos.y-1.7,pos.z-.25);
-    }
-
-    function spawnRuins(cx,cz){
-      const baseY = 2;
-      for(let x=-2;x<=2;x++) for(let z=-2;z<=2;z++) addBlock(cx+x,baseY,cz+z,'ancient_brick');
-      addDecor(cx-2,baseY+1,cz-2,'ancient_pillar'); addDecor(cx+2,baseY+1,cz-2,'ancient_pillar');
-      addDecor(cx-2,baseY+1,cz+2,'ancient_pillar'); addDecor(cx+2,baseY+1,cz+2,'ancient_pillar');
-      addDecor(cx,baseY+1.2,cz,'ruin_core');
-    }
-    function spawnFarm(cx,cz){
-      for(let x=0;x<4;x++) for(let z=0;z<4;z++){
-        addBlock(cx+x,2,cz+z,'farm_soil');
-        if((x+z)%3===0) addDecor(cx+x,2.7,cz+z,'wheat'); else if((x+z)%3===1) addDecor(cx+x,2.7,cz+z,'carrot');
-      }
-      addDecor(cx+5,2.6,cz+1,'cooking_station');
-    }
-
-    function generateWorld(){
-      clearWorld();
-      const size = 24;
-      for(let x=-size;x<=size;x++){
-        for(let z=-size;z<=size;z++){
-          const h = Math.floor(Math.sin(x*.22)*1.3 + Math.cos(z*.24)*1.1 + Math.sin((x+z)*.12)*.7 + 1);
-          for(let y=-3;y<=h;y++){
-            let id = y === h ? 'grass' : y > h-2 ? 'dirt' : 'stone';
-            if(y === h-1 && (x*z)%23===0) id='iron_ore';
-            addBlock(x,y,z,id);
-          }
-          if((x*17+z*13)%173===0 && h>=1){
-            for(let y=h+1;y<=h+4;y++) addBlock(x,y,z,'oak_log');
-          }
-          if((x*11+z*7)%257===0 && h>=1) addDecor(x,h+1.5,z,'berry_bush');
-          if((x*9-z*5)%331===0 && h>=1) addBlock(x,h+1,z,'glass');
-        }
-      }
-      spawnRuins(-10,-7); spawnFarm(8,-8); spawnRuins(12,10);
-      spawnMob('cow', 5,5); spawnMob('deer', -8,7); spawnMob('boar', 10,3); spawnMob('wolf', -6,-4); spawnMob('slime', 2,-8); spawnMob('goblin', 14,-10);
-    }
-
-    const mobs = [];
-    function spawnMob(type,x,z){
-      const root = new THREE.Group();
-      const palette = {
-        cow:[0x7c5a44,0xf1ece2], deer:[0x8b6a42,0xc7b07d], boar:[0x3f332d,0xcdb59e], wolf:[0x696f77,0x22252b], slime:[0x57c5ff,0x2d99d8], goblin:[0x6d8a4d,0x4f382e]
-      }[type] || [0x888888,0xffffff];
-      const main = new THREE.Mesh(new THREE.BoxGeometry(type==='slime'?0.9:1.1, type==='slime'?0.8:0.8, type==='slime'?0.9:0.6), new THREE.MeshStandardMaterial({color:palette[0], transparent:type==='slime', opacity:type==='slime'?.7:1}));
-      main.castShadow = true; root.add(main);
-      const head = new THREE.Mesh(new THREE.BoxGeometry(type==='goblin'?0.45:0.48,0.45,0.45), new THREE.MeshStandardMaterial({color:type==='cow'?palette[1]:palette[0]}));
-      head.position.set(type==='goblin'?0:.62,.18,0); if(type!=='slime') root.add(head);
-      const legGeo = new THREE.BoxGeometry(.14,.5,.14);
-      if(type!=='slime'){
-        for(const lx of [-.32,.32]) for(const lz of [-.2,.2]){
-          const leg = new THREE.Mesh(legGeo, new THREE.MeshStandardMaterial({color:palette[0]})); leg.position.set(lx,-.48,lz); leg.castShadow=true; root.add(leg);
-        }
-      }
-      if(type==='deer' || type==='boar' || type==='wolf'){
-        const tail = new THREE.Mesh(new THREE.BoxGeometry(.12,.12,.35), new THREE.MeshStandardMaterial({color:palette[0]})); tail.position.set(-.66,.05,0); root.add(tail);
-      }
-      if(type==='deer'){
-        const hornMat = new THREE.MeshStandardMaterial({color:0xc4b18b});
-        const h1 = new THREE.Mesh(new THREE.BoxGeometry(.06,.35,.06), hornMat); h1.position.set(.84,.48,.12); root.add(h1);
-        const h2 = h1.clone(); h2.position.z = -.12; root.add(h2);
-      }
-      if(type==='goblin'){
-        const body = new THREE.Mesh(new THREE.CapsuleGeometry(.25,.55,3,8), new THREE.MeshStandardMaterial({color:palette[0]})); body.position.set(0,.12,0); root.add(body);
-      }
-      root.position.set(x, 4.2, z);
-      root.userData = {type, hp:type==='goblin'?6:type==='wolf'?5:3, baseY:4.2, phase:Math.random()*Math.PI*2, dir:Math.random()*Math.PI*2, speed:.4 + Math.random()*.25};
-      mobGroup.add(root); mobs.push(root);
-      return root;
-    }
-
-    function updateMobs(dt){
-      let enemies=0;
-      for(const m of mobs){
-        const u = m.userData; u.phase += dt*2; if(Math.random()<0.008) u.dir += (Math.random()-.5)*1.6;
-        const vx = Math.cos(u.dir)*u.speed*dt, vz = Math.sin(u.dir)*u.speed*dt;
-        m.position.x += vx; m.position.z += vz;
-        m.position.y = u.baseY + Math.sin(u.phase)*0.03;
-        m.rotation.y = -u.dir + Math.PI/2;
-        const d = m.position.distanceTo(player.pos);
-        if(['wolf','goblin','slime','boar'].includes(u.type) && d < 15) enemies++;
-      }
-      enemyCountEl.textContent = `${enemies} 体付近`;
-    }
-
-    // First-person hands
-    const handGroup = new THREE.Group();
-    const armMat = new THREE.MeshStandardMaterial({color:0xd7b08d});
-    const sleeveMat = new THREE.MeshStandardMaterial({color:0x2f73aa});
-    function buildArm(side=1){
-      const g = new THREE.Group();
-      const upper = new THREE.Mesh(new THREE.BoxGeometry(.18,.52,.18), sleeveMat); upper.position.set(0,-.06,0); g.add(upper);
-      const fore = new THREE.Mesh(new THREE.BoxGeometry(.17,.42,.17), armMat); fore.position.set(0,-.52,0); g.add(fore);
-      g.position.set(.42*side,-.35,-.7); g.rotation.z = .18*side; g.rotation.x = -.4;
-      return g;
-    }
-    const leftArm = buildArm(-1), rightArm = buildArm(1);
-    const equipMesh = new THREE.Mesh(new THREE.BoxGeometry(.18,.4,.08), new THREE.MeshStandardMaterial({color:0xcfd6df}));
-    equipMesh.position.set(.16,-.72,-.86); equipMesh.rotation.set(.45,.08,-.25);
-    handGroup.add(leftArm,rightArm,equipMesh);
-    camera.add(handGroup); scene.add(camera);
-
-    function updateEquipVisual(){
-      const id = state.hotbar[state.selectedSlot];
-      const def = itemDefs[id];
-      equipText.textContent = def ? def.name : '素手';
-      if(!def || ['tool','weapon','magic'].includes(def.type)===false){
-        equipMesh.visible = false;
-      }else{
-        equipMesh.visible = true;
-        const iconColor = def.type==='magic' ? 0x8c76ff : def.type==='weapon' ? 0xc9d2dd : 0x9d8a70;
-        equipMesh.material.color.setHex(iconColor);
-        if(def.id==='bow'){}
-      }
-    }
-
-    function setPerspective(mode){
-      state.perspective = mode;
-      handGroup.visible = mode === 'first';
-      el('#contextLine').textContent = mode === 'first' ? '左クリック / 破壊　右クリック / 設置　F / 攻撃　C / クラフト　V / 視点変更' : '三人称視点：Vで一人称へ　ブロック破壊・設置は可能';
-    }
-    function togglePerspective(){ setPerspective(state.perspective === 'first' ? 'third' : 'first'); }
-
-    function showToast(msg){ toast.textContent = msg; toast.classList.add('show'); clearTimeout(showToast.t); showToast.t = setTimeout(()=>toast.classList.remove('show'), 1300); }
-
-    function openInventory(){ inventoryOverlay.classList.remove('hidden'); state.paused = true; pauseScreen.classList.add('hidden'); document.exitPointerLock?.(); renderInventory(); }
-    function closeInventory(){ inventoryOverlay.classList.add('hidden'); state.paused = false; if(matchMedia('(pointer:fine)').matches && state.running) renderer.domElement.requestPointerLock?.(); }
-    function openHelp(){ helpOverlay.classList.remove('hidden'); state.paused = true; pauseScreen.classList.add('hidden'); document.exitPointerLock?.(); }
-    function closeHelp(){ helpOverlay.classList.add('hidden'); state.paused = false; if(matchMedia('(pointer:fine)').matches && state.running) renderer.domElement.requestPointerLock?.(); }
-    function setPause(v){ state.paused = v; pauseScreen.classList.toggle('hidden', !v); if(v) document.exitPointerLock?.(); else if(matchMedia('(pointer:fine)').matches && state.running) renderer.domElement.requestPointerLock?.(); }
-
-    function renderCategories(){
-      const wrap = el('#categoryList'); wrap.innerHTML='';
-      for(const [key,val] of Object.entries(categoryData)){
-        const b = document.createElement('button'); b.textContent = val.label; b.className = state.inventoryCategory===key?'active':'';
-        b.onclick = ()=>{ state.inventoryCategory = key; renderInventory(); };
-        wrap.appendChild(b);
-      }
-    }
-    function renderInventory(){
-      renderCategories();
-      const items = categoryData[state.inventoryCategory].items;
-      const grid = el('#inventoryItems'); grid.innerHTML='';
-      for(const id of items){
-        const def = itemDefs[id];
-        const card = document.createElement('div'); card.className='itemCard';
-        card.innerHTML = `<div class="cardIcon" style="background:${def.color ? '#'+def.color.toString(16).padStart(6,'0') : 'rgba(255,255,255,.08)'}">${def.icon || '⬛'}</div><strong>${def.name}</strong><small>${def.desc || ''}</small><div style="margin-top:8px;opacity:.7">タップで選択中スロットに登録</div>`;
-        card.onclick = ()=>{ state.hotbar[state.selectedSlot] = id; renderHotbar(); updateEquipVisual(); showToast(`${def.name} を登録`); };
-        grid.appendChild(card);
-      }
-    }
-
-
-    function canCraft(recipe){
-      return Object.entries(recipe.cost).every(([k,v]) => (state.materials[k] || 0) >= v);
-    }
-    function renderCrafting(){
-      const labels = {wood:'木材',stone:'石',iron:'鉄',crystal:'魔結晶',food:'食料'};
-      el('#materialSummary').innerHTML = '<strong>所持素材</strong><br>' +
-        Object.entries(state.materials).map(([k,v]) => `${labels[k] || k}: ${v}`).join('　');
-      const wrap = el('#craftRecipes');
-      wrap.innerHTML = '';
-      for(const recipe of recipes){
-        const card = document.createElement('div');
-        card.className = 'itemCard';
-        const costText = Object.entries(recipe.cost).map(([k,v]) => `${labels[k] || k}×${v}`).join(' / ');
-        card.innerHTML = `<div class="cardIcon">${recipe.icon}</div><strong>${recipe.name}</strong><small>必要素材：${costText}</small><button class="hudBtn" style="width:100%;margin-top:10px" ${canCraft(recipe)?'':'disabled'}>作成</button>`;
-        card.querySelector('button').addEventListener('click', () => craftRecipe(recipe));
-        wrap.appendChild(card);
-      }
-    }
-    function craftRecipe(recipe){
-      if(!canCraft(recipe)){ showToast('素材が足りません'); return; }
-      for(const [k,v] of Object.entries(recipe.cost)) state.materials[k] -= v;
-      state.crafted[recipe.result] = (state.crafted[recipe.result] || 0) + (recipe.amount || 1);
-      const idx = state.hotbar.findIndex(id => id === recipe.result);
-      if(idx < 0) state.hotbar[state.selectedSlot] = recipe.result;
-      renderHotbar();
-      renderCrafting();
-      showToast(`${recipe.name} を作成`);
-    }
-    function openCraft(){
-      craftOverlay.classList.remove('hidden');
-      inventoryOverlay.classList.add('hidden');
-      pauseScreen.classList.add('hidden');
-      state.paused = true;
-      document.exitPointerLock?.();
-      renderCrafting();
-    }
-    function closeCraft(){
-      craftOverlay.classList.add('hidden');
-      state.paused = false;
-      if(matchMedia('(pointer:fine)').matches && state.running) renderer.domElement.requestPointerLock?.();
-    }
-
-
-    function updateControlLabels(){
-      el('#toggleLookXBtn').textContent = `視点・左右：${state.invertLookX ? '反転' : '通常'}`;
-      el('#toggleLookYBtn').textContent = `視点・上下：${state.invertLookY ? '反転' : '通常'}`;
-      el('#toggleMoveXBtn').textContent = `移動・左右：${state.invertMoveX ? '反転' : '通常'}`;
-      el('#toggleMoveYBtn').textContent = `移動・前後：${state.invertMoveY ? '反転' : '通常'}`;
-    }
-    function openSettings(){
-      settingsOverlay.classList.remove('hidden');
-      state.paused = true;
-      document.exitPointerLock?.();
-      updateControlLabels();
-    }
-    function closeSettings(){
-      settingsOverlay.classList.add('hidden');
-      state.paused = false;
-      if(matchMedia('(pointer:fine)').matches && state.running) renderer.domElement.requestPointerLock?.();
-    }
-
-    function renderHotbar(){
-      hotbarEl.innerHTML='';
-      state.hotbar.forEach((id,i)=>{
-        const def = itemDefs[id] || {name:'不明', icon:'?'};
-        const slot = document.createElement('button'); slot.className = 'slot'+(i===state.selectedSlot?' selected':''); slot.type='button';
-        slot.innerHTML = `<div class="icon" style="background:${def.color ? '#'+def.color.toString(16).padStart(6,'0') : 'rgba(255,255,255,.08)'}">${def.icon || ''}</div><div>${i+1}</div><div>${def.name}</div>`;
-        slot.onclick = ()=>{ state.selectedSlot = i; renderHotbar(); updateEquipVisual(); };
-        hotbarEl.appendChild(slot);
-      });
-      updateEquipVisual();
-    }
-
-    function updateHud(){
-      const healthPct = state.health / state.maxHealth * 100, manaPct = state.mana / state.maxMana * 100, xpPct = state.xp;
-      el('#lifeFill').style.width = `${healthPct}%`; el('#lifeVal').textContent = `${Math.round(state.health)} / ${state.maxHealth}`;
-      el('#manaFill').style.width = `${manaPct}%`; el('#manaVal').textContent = `${Math.round(state.mana)} / ${state.maxMana}`;
-      el('#xpFill').style.width = `${xpPct}%`; el('#xpVal').textContent = `Lv.${state.level}`;
-      attrText.textContent = `火${state.attributes.fire} / 水${state.attributes.water} / 風${state.attributes.wind} / 土${state.attributes.earth} / 光${state.attributes.light} / 闇${state.attributes.dark}`;
-      el('#gauge').style.background = `conic-gradient(#79e0ff 0deg, #79e0ff ${state.stamina/100*360}deg, rgba(255,255,255,.08) ${state.stamina/100*360}deg 360deg)`;
-      el('#gaugeVal').textContent = `${Math.round(state.stamina)}`;
-      coordsEl.textContent = `X ${player.pos.x.toFixed(1)} / Y ${player.pos.y.toFixed(1)} / Z ${player.pos.z.toFixed(1)}`;
-    }
-
-    function updateSaveMeta(){
-      const raw = localStorage.getItem(SAVE_KEY);
-      if(!raw){ saveMeta.innerHTML = 'セーブデータがありません。<br>「はじめから」で新しい世界を作成できます。'; return; }
-      try{
-        const data = JSON.parse(raw);
-        saveMeta.innerHTML = `ワールド名：はじまりの大地<br>プレイ時間：${data.playMinutes || 13} 分<br>現在地：始まりの草原<br>ゲーム日数：${data.gameDays || 4} 日目<br>最終保存：${data.savedAt || new Date().toLocaleString('ja-JP')}`;
-      }catch{
-        saveMeta.innerHTML = 'セーブデータの読み込みに失敗しました。';
-      }
-    }
-
-    function resetPlayer(){ player.pos.set(0,7,8); player.vel.set(0,0,0); player.yaw=0; player.pitch=-.14; }
-
-    function saveGame(){
-      const data = {
-        player:{x:player.pos.x,y:player.pos.y,z:player.pos.z,yaw:player.yaw,pitch:player.pitch},
-        stats:{health:state.health,mana:state.mana,level:state.level,xp:state.xp,stamina:state.stamina,attributes:state.attributes},
-        hotbar:state.hotbar,perspective:state.perspective,materials:state.materials,mobDrops:state.mobDrops,crafted:state.crafted,
-        controls:{invertLookX:state.invertLookX,invertLookY:state.invertLookY,invertMoveX:state.invertMoveX,invertMoveY:state.invertMoveY},
-        blocks:[...blockMap.values()].map(m=>m.userData),
-        savedAt:new Date().toLocaleString('ja-JP'), playMinutes:13, gameDays:4
-      };
-      localStorage.setItem(SAVE_KEY, JSON.stringify(data)); showToast('保存しました'); updateSaveMeta();
-    }
-    function loadGame(){
-      const raw = localStorage.getItem(SAVE_KEY); if(!raw) return false;
-      try{
-        const data = JSON.parse(raw); clearWorld();
-        for(const b of data.blocks || []) addBlock(b.x,b.y,b.z,b.id || 'grass');
-        spawnFarm(8,-8); spawnRuins(-10,-7); spawnRuins(12,10);
-        spawnMob('cow', 5,5); spawnMob('deer', -8,7); spawnMob('boar', 10,3); spawnMob('wolf', -6,-4); spawnMob('slime', 2,-8); spawnMob('goblin', 14,-10);
-        player.pos.set(data.player.x,data.player.y,data.player.z); player.yaw=data.player.yaw||0; player.pitch=data.player.pitch||-.14; player.vel.set(0,0,0);
-        Object.assign(state, {hotbar:data.hotbar || state.hotbar, perspective:data.perspective || 'first'});
-        if(data.stats){ state.health=data.stats.health; state.mana=data.stats.mana; state.level=data.stats.level; state.xp=data.stats.xp; state.stamina=data.stats.stamina; state.attributes=data.stats.attributes || state.attributes; }
-        state.materials = data.materials || state.materials; state.mobDrops = data.mobDrops || state.mobDrops; state.crafted = data.crafted || state.crafted;
-        if(data.controls) Object.assign(state, data.controls);
-        setPerspective(state.perspective); renderHotbar(); updateHud(); return true;
-      }catch(e){ console.error(e); return false; }
-    }
-
-    function currentItem(){ return itemDefs[state.hotbar[state.selectedSlot]]; }
-    function targetHit(){ raycaster.setFromCamera(new THREE.Vector2(0,0), camera); const all = [...groundGroup.children, ...decorGroup.children]; return raycaster.intersectObjects(all,false).find(h=>h.distance <= 7) || null; }
-
-    function nearestMobHit(){
-      raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-      return raycaster.intersectObjects(mobGroup.children, true).find(h => h.distance <= 5.5) || null;
-    }
-    function attack(){
-      const hit = nearestMobHit();
-      if(!hit){ showToast('攻撃は空振り'); return; }
-      let root = hit.object;
-      while(root.parent && root.parent !== mobGroup) root = root.parent;
-      if(root.parent !== mobGroup) return;
-      root.userData.hp = (root.userData.hp ?? 3) - (currentItem()?.type === 'weapon' ? 2 : 1);
-      root.scale.setScalar(1.12);
-      setTimeout(() => root.scale.setScalar(1), 100);
-      if(root.userData.hp <= 0){
-        const type = root.userData.type;
-        if(type === 'cow' || type === 'deer' || type === 'boar'){
-          state.mobDrops.meat += 1;
-          state.mobDrops.hide += 1;
-          state.materials.food += 1;
-        }else if(type === 'slime'){
-          state.mobDrops.slimeGel += 2;
-          state.materials.crystal += 1;
-        }else if(type === 'goblin'){
-          state.mobDrops.goblinCore += 1;
-          state.materials.iron += 1;
-        }
-        mobGroup.remove(root);
-        const i = mobs.indexOf(root);
-        if(i >= 0) mobs.splice(i,1);
-        state.xp = Math.min(100, state.xp + 12);
-        showToast(`${type} を倒した`);
-      }else{
-        showToast('攻撃が命中');
-      }
-      updateHud();
-    }
-
-    function breakBlock(){
-      const hit = targetHit(); if(!hit) return;
-      const o = hit.object; if(o.userData.kind === 'block'){
-        if(o.userData.y <= -2) return;
-        groundGroup.remove(o); blockMap.delete(key(o.userData.x,o.userData.y,o.userData.z));
-        if(o.userData.id === 'oak_log') state.materials.wood += 1;
-        else if(o.userData.id === 'iron_ore') state.materials.iron += 1;
-        else if(o.userData.id === 'crystal_ore') state.materials.crystal += 1;
-        else state.materials.stone += 1;
-        state.xp = Math.min(100, state.xp + 2);
-        if(state.xp >= 100){ state.xp = 0; state.level += 1; state.attributes.earth += 1; showToast('レベルアップ！'); }
-        showToast('ブロックを壊した');
-      }else if(o.userData.kind === 'decor'){
-        decorGroup.remove(o); showToast('オブジェクトを回収');
-      }
-      updateHud();
-    }
-    function placeBlock(){
-      const item = currentItem(); if(!item) return;
-      if(!item.placeable){ showToast('このスロットは設置できません'); return; }
-      const hit = targetHit();
-      if(hit){
-        const pos = hit.object.position.clone().add(hit.face.normal); pos.round();
-        if(Math.abs(pos.x-player.pos.x)<.8 && Math.abs(pos.y-player.pos.y)<1.8 && Math.abs(pos.z-player.pos.z)<.8) return;
-        if(['decor','workstation'].includes(item.type) || ['wheat','carrot','berry_bush','ancient_pillar','portal_frame','relic_chest','cooking_station','workbench','furnace','ruin_core'].includes(state.hotbar[state.selectedSlot])){
-          addDecor(pos.x, pos.y, pos.z, state.hotbar[state.selectedSlot]);
-        }else{
-          addBlock(pos.x, pos.y, pos.z, state.hotbar[state.selectedSlot]);
-        }
-        state.xp = Math.min(100, state.xp + 1); showToast(`${item.name} を設置`); updateHud();
-      }else{
-        const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); const pos = player.pos.clone().add(fwd.multiplyScalar(3)); pos.round();
-        addBlock(pos.x,pos.y,pos.z,state.hotbar[state.selectedSlot]);
-      }
-    }
-
-    function jump(){ if(player.onGround){ player.vel.y = 7.6; player.onGround = false; state.stamina = Math.max(0,state.stamina-5); } }
-
-    function updatePlayer(dt){
-      const f = new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw));
-      const r = new THREE.Vector3(Math.cos(player.yaw),0,Math.sin(player.yaw));
-      let touchForward = state.invertMoveY ? moveY : -moveY;
-      let touchStrafe = state.invertMoveX ? -moveX : moveX;
-      let forward = (keys.KeyW?1:0) - (keys.KeyS?1:0) + touchForward;
-      let strafe = (keys.KeyD?1:0) - (keys.KeyA?1:0) + touchStrafe;
-      const moving = Math.abs(forward) + Math.abs(strafe) > 0.01;
-      const sprinting = (keys.ShiftLeft || keys.ShiftRight) && state.stamina > 1 && moving;
-      const wish = f.multiplyScalar(forward).add(r.multiplyScalar(strafe)); if(wish.lengthSq() > 1) wish.normalize();
-      const speed = sprinting ? 7.4 : 5.2;
-      player.vel.x = THREE.MathUtils.lerp(player.vel.x, wish.x*speed, Math.min(1, dt*11));
-      player.vel.z = THREE.MathUtils.lerp(player.vel.z, wish.z*speed, Math.min(1, dt*11));
-      player.vel.y -= 18.6*dt;
-      player.onGround = grounded(player.pos); if(player.onGround && player.vel.y < 0) player.vel.y = -0.4;
-      const nx = player.pos.clone(); nx.x += player.vel.x*dt; if(!collides(nx)) player.pos.x = nx.x; else player.vel.x = 0;
-      const nz = player.pos.clone(); nz.z += player.vel.z*dt; if(!collides(nz)) player.pos.z = nz.z; else player.vel.z = 0;
-      const ny = player.pos.clone(); ny.y += player.vel.y*dt; if(!collides(ny)) player.pos.y = ny.y; else { if(player.vel.y < 0) player.onGround = true; player.vel.y = 0; }
-      if(player.pos.y < -20) resetPlayer();
-      if(sprinting) state.stamina = Math.max(0, state.stamina - 17*dt); else state.stamina = Math.min(100, state.stamina + 10*dt);
-      state.mana = Math.min(state.maxMana, state.mana + 2*dt);
-      camera.rotation.y = player.yaw; camera.rotation.x = player.pitch;
-      if(state.perspective === 'first'){
-        camera.position.copy(player.pos);
-      }else{
-        const back = new THREE.Vector3(Math.sin(player.yaw), 0, -Math.cos(player.yaw)).multiplyScalar(-4.2);
-        camera.position.copy(player.pos.clone().add(new THREE.Vector3(0,1.5,0)).add(back).add(new THREE.Vector3(0,1.1,0)));
-        camera.lookAt(player.pos.x, player.pos.y+1.2, player.pos.z);
-      }
-      leftArm.rotation.x = -.4 + Math.sin(performance.now()*.01) * (moving?.05:.01);
-      rightArm.rotation.x = -.45 - Math.sin(performance.now()*.01) * (moving?.05:.01);
-      equipMesh.rotation.x = .48 + Math.sin(performance.now()*.014) * .03;
-    }
-
-    function loop(now){
-      requestAnimationFrame(loop); const dt = Math.min(.034, (now-last)/1000); last = now;
-      if(state.running && !state.paused){ updatePlayer(dt); updateMobs(dt); updateHud(); }
-      renderer.render(scene,camera);
-    }
-
-    function startGame(load){
-      const ok = load ? loadGame() : false;
-      if(!ok){ generateWorld(); resetPlayer(); renderHotbar(); setPerspective('first'); updateHud(); }
-      titleScreen.classList.add('hidden'); hud.classList.remove('hidden'); mobileControls.classList.remove('hidden'); state.running = true; state.paused = false;
-      if(matchMedia('(pointer:fine)').matches) renderer.domElement.requestPointerLock?.();
-    }
-
-    // Events
-    addEventListener('resize', ()=>{ camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
-    addEventListener('keydown', e=>{
-      keys[e.code] = true;
-      if(/^Digit[1-8]$/.test(e.code)){ state.selectedSlot = Number(e.code.slice(-1)) - 1; renderHotbar(); }
-      if(e.code === 'Space') jump();
-      if(e.code === 'KeyV') togglePerspective();
-      if(e.code === 'KeyB') openInventory();
-      if(e.code === 'KeyC') openCraft();
-      if(e.code === 'KeyF') attack();
-      if(e.code === 'Escape' && state.running) setPause(!state.paused);
-    });
-    addEventListener('keyup', e=>keys[e.code]=false);
-    addEventListener('mousemove', e=>{
-      if(document.pointerLockElement !== renderer.domElement || state.paused || !state.running) return;
-      player.yaw += e.movementX * .0024 * (state.invertLookX ? 1 : -1);
-      player.pitch = THREE.MathUtils.clamp(player.pitch + e.movementY * .0024 * (state.invertLookY ? 1 : -1), -1.48, 1.48);
-    });
-    renderer.domElement.addEventListener('click', ()=>{ if(state.running && !state.paused && matchMedia('(pointer:fine)').matches && document.pointerLockElement !== renderer.domElement) renderer.domElement.requestPointerLock?.(); });
-    renderer.domElement.addEventListener('mousedown', e=>{ if(!state.running || state.paused || document.pointerLockElement !== renderer.domElement) return; if(e.button===0) breakBlock(); if(e.button===2) placeBlock(); });
-    renderer.domElement.addEventListener('contextmenu', e=>e.preventDefault());
-
-    el('#newGameBtn').onclick = ()=>startGame(false);
-    el('#continueBtn').onclick = ()=>startGame(true);
-    el('#howBtn').onclick = ()=>openHelp();
-    el('#settingsBtn').onclick = openSettings;
-    el('#worldBtn').onclick = ()=>showToast('ワールドは今後複数化予定');
-    el('#creditsBtn').onclick = ()=>showToast('REAL CRAFT α0.4');
-    el('#pauseBtn').onclick = ()=>setPause(true);
-    el('#resumeBtn').onclick = ()=>setPause(false);
-    el('#saveBtn').onclick = ()=>saveGame();
-    el('#titleBtn').onclick = ()=>{ saveGame(); state.running=false; state.paused=false; pauseScreen.classList.add('hidden'); hud.classList.add('hidden'); mobileControls.classList.add('hidden'); titleScreen.classList.remove('hidden'); };
-    el('#openInventoryBtn').onclick = openInventory; el('#inventoryBtnPause').onclick = openInventory; el('#craftBtnPause').onclick = openCraft; el('#closeInventoryBtn').onclick = closeInventory;
-    el('#closeCraftBtn').onclick = closeCraft;
-
-    el('#closeSettingsBtn').onclick = closeSettings;
-    el('#toggleLookXBtn').onclick = ()=>{ state.invertLookX = !state.invertLookX; updateControlLabels(); };
-    el('#toggleLookYBtn').onclick = ()=>{ state.invertLookY = !state.invertLookY; updateControlLabels(); };
-    el('#toggleMoveXBtn').onclick = ()=>{ state.invertMoveX = !state.invertMoveX; updateControlLabels(); };
-    el('#toggleMoveYBtn').onclick = ()=>{ state.invertMoveY = !state.invertMoveY; updateControlLabels(); };
-    el('#resetControlsBtn').onclick = ()=>{
-      state.invertLookX = false; state.invertLookY = false; state.invertMoveX = false; state.invertMoveY = false;
-      updateControlLabels(); showToast('操作設定を初期化');
-    };
-
-    el('#helpBtnPause').onclick = openHelp; el('#closeHelpBtn').onclick = closeHelp;
-
-    // Mobile
-    el('#jumpBtn').addEventListener('pointerdown', jump); el('#breakBtn').addEventListener('pointerdown', breakBlock); el('#placeBtn').addEventListener('pointerdown', placeBlock); el('#viewBtn').addEventListener('pointerdown', togglePerspective); el('#attackBtn').addEventListener('pointerdown', attack); el('#craftBtn').addEventListener('pointerdown', openCraft); el('#menuBtn').addEventListener('pointerdown', ()=>setPause(true));
-    const lookZone = el('#lookZone'); let lookId=null,lastLookX=0,lastLookY=0;
-    lookZone.addEventListener('pointerdown', e=>{ lookId=e.pointerId; lastLookX=e.clientX; lastLookY=e.clientY; lookZone.setPointerCapture(e.pointerId); });
-    lookZone.addEventListener('pointermove', e=>{ if(e.pointerId!==lookId || state.paused) return; const dx=e.clientX-lastLookX, dy=e.clientY-lastLookY; lastLookX=e.clientX; lastLookY=e.clientY; player.yaw += dx*.006 * (state.invertLookX ? 1 : -1);
-      player.pitch = THREE.MathUtils.clamp(player.pitch + dy*.006 * (state.invertLookY ? 1 : -1), -1.48, 1.48); });
-    lookZone.addEventListener('pointerup', e=>{ if(e.pointerId===lookId) lookId=null; }); lookZone.addEventListener('pointercancel', e=>{ if(e.pointerId===lookId) lookId=null; });
-
-    const movePad = el('#movePad'), moveKnob = el('#moveKnob'); let moveId=null;
-    function updateMove(e){ const rect=movePad.getBoundingClientRect(); let dx=e.clientX-(rect.left+rect.width/2), dy=e.clientY-(rect.top+rect.height/2); const max=rect.width*.32; const len=Math.hypot(dx,dy)||1; if(len>max){dx=dx/len*max; dy=dy/len*max;} moveX = dx/max; moveY = dy/max; moveKnob.style.transform = `translate(${dx}px,${dy}px)`; }
-    movePad.addEventListener('pointerdown', e=>{ moveId=e.pointerId; movePad.setPointerCapture(e.pointerId); updateMove(e); });
-    movePad.addEventListener('pointermove', e=>{ if(e.pointerId===moveId) updateMove(e); });
-    function resetMove(e){ if(e.pointerId!==moveId) return; moveId=null; moveX=0; moveY=0; moveKnob.style.transform=''; }
-    movePad.addEventListener('pointerup', resetMove); movePad.addEventListener('pointercancel', resetMove);
-
-    renderHotbar(); renderInventory(); updateHud(); updateSaveMeta(); setPerspective('first');
-    loadingScreen.classList.add('hidden'); titleScreen.classList.remove('hidden');
-    requestAnimationFrame(loop);
+    const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],SAVE_KEY="real-craft-save-v05";
+    const worlds=[["grassland","草原",0x86c9f4,0x67a64c,.8],["forest","森林",0x78b8db,0x3f7438,1.3],["snow","雪原",0xb8ddf0,0xe6eef4,.7],["desert","砂漠",0xe7c787,0xc9aa62,.35],["swamp","沼地",0x78928d,0x4d6944,.55],["volcano","火山",0x5f4d49,0x5a443d,1.8],["ancient","古代遺跡",0x8eb0c0,0x77806f,.8],["skyruins","空中遺跡",0x83c8f4,0x6d845e,1.7],["cave","洞窟",0x25303c,0x4c4d52,1.5],["crystal","水晶洞窟",0x4e537b,0x55516f,1.4],["ocean","海",0x75bdeb,0x4d92bf,.15],["river","川",0x8fc8e9,0x5c9d57,.65],["lake","湖",0x89c2e5,0x5e9d57,.45]];
+    const workstations=["作業台","石の作業台","製材台","石切り台","かまど","強化かまど","高温かまど","精錬炉","金床","鍛冶台","研磨台","裁縫台","皮加工台","料理台","ポーション台","魔法祭壇","エンチャント台","修理台","解体台","発電機","古代装置","鉱石粉砕機","浄水器","蒸留器"];
+    const farming=["小麦","にんじん","じゃがいも","玉ねぎ","ベリー","ハーブ","薬草","水田","キノコ栽培","果樹","温室","スプリンクラー","水路","堆肥","肥料箱","かかし"];
+    const building=["扉","鉄扉","魔法扉","古代扉","落とし戸","柵","柵門","窓","格子窓","はしご","ロープ","ロープはしご","足場","エレベーター","滑車","吊り橋","階段","ハーフブロック","柱","梁","屋根","煙突","配管","電線","排水溝"];
+    const storage=["木箱","大型木箱","石収納","鉄収納","金庫","樽","食料棚","武器棚","防具棚","本棚","薬棚","鉱石保管棚","魔法収納","古代収納","ペット収納","冷蔵庫"];
+    const lights=["松明","壁松明","ランタン","吊りランタン","焚き火","大焚き火","かがり火","ろうそく","シャンデリア","発光石","発光植物","発光キノコ","魔法灯","ソーラーランプ","水中ランプ","古代照明"];
+    const domestic=["ブタ","ウシ","ヤギ","ヒツジ","ニワトリ","ウサギ","ウマ","イヌ","ネコ","アヒル"],wild=["オオカミ","シカ","イノシシ","クマ","キツネ","ヤマネコ","アナグマ","カワウソ","リス","フクロモモンガ","ワシ","フクロウ","カメ","カエル","ハチ","サケ","カニ","大角鹿"],normalMonsters=["ゴブリン","スケルトン","ボーンアーチャー","スライム","洞窟グモ","ゾンビ鉱夫","ストーンゴーレム","シャドウトールマン","フレイムスピリット","深海ガーディアン","シャドウウルフ","ソーンクリーパー"],eliteMonsters=["グラッジワーグ","ハウリングウルフ","フィールドゴブリン","リーフアントラー","シャドウミミック","ブラッドハーピー"],systems=["クラフト","採掘","建築","魔法","エンチャント","ポーション","農業","畜産","料理","ペット","古代文明","ダンジョン","ボス","アイテム収集","レベル","経験値"];
+    const catalog={};function addCat(key,label,names,kind,base){catalog[key]={label,items:names.map((name,i)=>({id:`${key}_${i}`,name,kind,color:(base+i*1731)&0xffffff}))}}
+    const basics=["草ブロック","土ブロック","石ブロック","砂","砂利","粘土","苔石","黒曜石","氷","雪","泥","岩盤"],clearGlass=Array.from({length:14},(_,i)=>`ガラス形状 ${i+1}`),colored=["白","橙","赤紫","空色","黄","黄緑","桃","灰","薄灰","水色","紫","青","茶","緑","赤","黒"].map(x=>`${x}色ガラス`);
+    addCat("basic","基本ブロック",basics,"block",0x668b46);addCat("glass","ガラス30種類",[...clearGlass,...colored],"block",0x9fdcff);addCat("architecture","建築ブロック",[...building,...Array.from({length:32},(_,i)=>`建築装飾ブロック ${i+1}`)],"block",0x8b765d);addCat("ancient","古代文明ブロック",Array.from({length:28},(_,i)=>`古代文明ブロック ${i+1}`),"block",0x787d72);addCat("magic","魔法ブロック",Array.from({length:24},(_,i)=>`魔法ブロック ${i+1}`),"block",0x7367d8);addCat("workstations","作業設備24種類",workstations,"device",0x8b623e);addCat("lighting","光源ブロック",lights,"light",0xe0a34f);addCat("farming","農業ブロック",farming,"farm",0x6c9b47);addCat("liquid","水・液体系ブロック",["水","海水","川水","沼水","溶岩","毒液","回復水","魔力液","油","蒸気"],"liquid",0x4eaee8);addCat("storage","収納ブロック",storage,"storage",0x8d6548);addCat("resources","資源・素材ブロック",Array.from({length:36},(_,i)=>`鉱石・木材バリエーション ${i+1}`),"block",0x777f8d);
+    const allItems=Object.values(catalog).flatMap(c=>c.items),scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.05,180);camera.rotation.order="YXZ";
+    const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;document.body.prepend(renderer.domElement);
+    scene.add(new THREE.HemisphereLight(0xddeeff,0x4d563e,1.7));const sun=new THREE.DirectionalLight(0xffefcc,2.2);sun.position.set(25,35,12);sun.castShadow=true;scene.add(sun);
+    const worldGroup=new THREE.Group(),mobGroup=new THREE.Group();scene.add(worldGroup,mobGroup);const geo=new THREE.BoxGeometry(1,1,1),blocks=new Map(),materials=new Map(),mobs=[],raycaster=new THREE.Raycaster();
+    let selectedWorld=worlds[0],running=false,paused=false,perspective="first",selectedSlot=0,last=performance.now(),moveX=0,moveY=0;const player={pos:new THREE.Vector3(0,7,8),vel:new THREE.Vector3(),yaw:0,pitch:-.12,onGround:false},survival={life:100,hunger:100,thirst:100,stamina:100,sleep:100,mental:100,health:100,level:1,xp:0},keys={};
+    const hotbar=[allItems.find(x=>x.name==="草ブロック"),allItems.find(x=>x.name==="石ブロック"),catalog.glass.items[0],catalog.workstations.items[0],catalog.lighting.items[0],catalog.farming.items[0],catalog.storage.items[0],catalog.magic.items[0]];
+    const k=(x,y,z)=>`${x},${y},${z}`;function matFor(item){if(!materials.has(item.id)){const o={color:item.color||0x888888};if(item.kind==="liquid"||item.id.startsWith("glass_")){o.transparent=true;o.opacity=.52}if(item.kind==="light"){o.emissive=item.color;o.emissiveIntensity=.7}materials.set(item.id,new THREE.MeshStandardMaterial(o))}return materials.get(item.id)}
+    function addBlock(x,y,z,item){if(blocks.has(k(x,y,z)))return;const m=new THREE.Mesh(geo,matFor(item));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;m.userData={x,y,z,itemId:item.id};worldGroup.add(m);blocks.set(k(x,y,z),m)}
+    function clearWorld(){while(worldGroup.children.length)worldGroup.remove(worldGroup.children[0]);while(mobGroup.children.length)mobGroup.remove(mobGroup.children[0]);blocks.clear();mobs.length=0}
+    const heightAt=(x,z,r)=>Math.floor(Math.sin(x*.21)*r+Math.cos(z*.24)*r*.8+Math.sin((x+z)*.1)*r*.5+1);
+    function generateWorld(w){selectedWorld=w;clearWorld();scene.background=new THREE.Color(w[2]);scene.fog=new THREE.Fog(w[2],30,115);const base={id:`ground_${w[0]}`,name:w[1],kind:"block",color:w[3]},stone=allItems.find(x=>x.name==="石ブロック"),water=catalog.liquid.items[0],lava=catalog.liquid.items[4],size=25;
+      for(let x=-size;x<=size;x++)for(let z=-size;z<=size;z++){let h=heightAt(x,z,w[4]);if(w[0]==="ocean")h=-1;if(w[0]==="skyruins"&&Math.abs(x)+Math.abs(z)>22)continue;for(let y=-4;y<=h;y++)addBlock(x,y,z,y===h?base:stone);if(["ocean","river","lake"].includes(w[0]))for(let y=h+1;y<=(w[0]==="ocean"?2:1);y++)addBlock(x,y,z,water);if(w[0]==="volcano"&&(x*x+z*z)<45&&h<3)addBlock(x,h+1,z,lava)}if(["ancient","skyruins","crystal"].includes(w[0]))buildRuins();seedMobs();resetPlayer();$("#biomeName").textContent=w[1]}
+    function buildRuins(){const b=catalog.ancient.items[0],p=catalog.ancient.items[1],c=catalog.magic.items[0];for(let x=-4;x<=4;x++)for(let z=-4;z<=4;z++)addBlock(x,3,z,b);for(const [x,z] of [[-4,-4],[4,-4],[-4,4],[4,4]])for(let y=4;y<9;y++)addBlock(x,y,z,p);addBlock(0,4,0,c)}
+    function colors(n){if(n.includes("スライム"))return[0x55c9f2,0x2c9bc8];if(n.includes("ゴブリン"))return[0x6e8e4b,0x3b4c2d];if(n.includes("スケルトン")||n.includes("ボーン"))return[0xd9d7ca,0x64645f];if(n.includes("ウシ"))return[0x6e5141,0xf0eadf];if(n.includes("ヒツジ"))return[0xe6e5df,0x77736a];if(n.includes("ブタ")||n.includes("イノシシ"))return[0xa36d62,0x5f443c];if(n.includes("シカ")||n.includes("大角鹿")||n.includes("アントラー"))return[0x936a40,0xd0b382];if(n.includes("オオカミ")||n.includes("ウルフ")||n.includes("ワーグ"))return[0x5d6670,0x252a30];if(n.includes("クマ"))return[0x5c4636,0x33281f];if(n.includes("キツネ"))return[0xc46d35,0xf1d9bd];if(n.includes("ゴーレム"))return[0x777b80,0x4d5055];if(n.includes("フレイム"))return[0xe76e2d,0xffc64d];if(n.includes("シャドウ"))return[0x2e2b45,0x0f1020];return[0x8a765f,0x58483a]}
+    function model(name,hostile=false){const g=new THREE.Group(),[c1,c2]=colors(name),m1=new THREE.MeshStandardMaterial({color:c1,transparent:name.includes("スライム"),opacity:name.includes("スライム")?.72:1}),m2=new THREE.MeshStandardMaterial({color:c2}),bird=["ニワトリ","アヒル","ワシ","フクロウ","フクロモモンガ","ブラッドハーピー"].some(x=>name.includes(x)),fish=["サケ","カニ","カメ","カエル","カワウソ"].some(x=>name.includes(x)),human=["ゴブリン","スケルトン","ゾンビ鉱夫","シャドウトールマン","ボーンアーチャー"].some(x=>name.includes(x)),slime=name.includes("スライム");let body=slime?new THREE.Mesh(new THREE.BoxGeometry(.9,.75,.9),m1):human?new THREE.Mesh(new THREE.CapsuleGeometry(.28,.7,4,8),m1):bird?new THREE.Mesh(new THREE.BoxGeometry(.7,.55,.55),m1):fish?new THREE.Mesh(new THREE.BoxGeometry(.85,.35,.38),m1):new THREE.Mesh(new THREE.BoxGeometry(1.05,.7,.55),m1);g.add(body);if(!slime){const h=new THREE.Mesh(new THREE.BoxGeometry(.45,.42,.42),m2);h.position.set(human?0:.66,.18,0);g.add(h)}if(!slime&&!fish&&!bird)for(const lx of[-.32,.32])for(const lz of[-.18,.18]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.13,.5,.13),m1);leg.position.set(lx,-.48,lz);g.add(leg)}if(bird)for(const z of[-.42,.42]){const wing=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,.38),m2);wing.position.set(0,0,z);g.add(wing)}if(name.includes("シカ")||name.includes("大角鹿")||name.includes("アントラー"))for(const z of[-.13,.13]){const horn=new THREE.Mesh(new THREE.BoxGeometry(.06,.46,.06),m2);horn.position.set(.78,.5,z);g.add(horn)}if(hostile){const a=new THREE.Mesh(new THREE.TorusGeometry(.7,.035,6,20),new THREE.MeshBasicMaterial({color:0xe85454}));a.rotation.x=Math.PI/2;a.position.y=-.55;g.add(a)}g.userData={name,hostile,hp:hostile?6:3,dir:Math.random()*Math.PI*2,speed:.3+Math.random()*.25,phase:Math.random()*10};return g}
+    function spawnMob(name,hostile=false,x=(Math.random()-.5)*22,z=(Math.random()-.5)*22){const g=model(name,hostile);g.position.set(x,4,z);mobGroup.add(g);mobs.push(g)}function seedMobs(){const f=[...domestic,...wild],e=[...normalMonsters,...eliteMonsters];for(let i=0;i<9;i++)spawnMob(f[(Math.random()*f.length)|0]);for(let i=0;i<6;i++)spawnMob(e[(Math.random()*e.length)|0],true)}
+    function updateMobs(dt){for(const m of mobs){const u=m.userData;u.phase+=dt;if(Math.random()<.006)u.dir+=(Math.random()-.5)*1.5;m.position.x+=Math.cos(u.dir)*u.speed*dt;m.position.z+=Math.sin(u.dir)*u.speed*dt;m.position.y=4+Math.sin(u.phase*2)*.035;m.rotation.y=-u.dir+Math.PI/2}$("#mobCount").textContent=mobs.length}
+    const hand=new THREE.Group(),skin=new THREE.MeshStandardMaterial({color:0xd7ae88}),sleeve=new THREE.MeshStandardMaterial({color:0x2d77a9});function arm(s){const g=new THREE.Group(),a=new THREE.Mesh(new THREE.BoxGeometry(.16,.46,.16),sleeve),h=new THREE.Mesh(new THREE.BoxGeometry(.15,.35,.15),skin);a.position.y=-.05;h.position.y=-.43;g.add(a,h);g.position.set(.35*s,-.28,-.67);g.rotation.x=-.35;g.rotation.z=.14*s;return g}hand.add(arm(-1),arm(1));camera.add(hand);scene.add(camera);
+    const solidAt=(x,y,z)=>blocks.has(k(Math.round(x),Math.round(y),Math.round(z)));function collides(p){for(const y of[p.y-1.35,p.y-.45,p.y+.35])for(const x of[p.x-.28,p.x+.28])for(const z of[p.z-.28,p.z+.28])if(solidAt(x,y,z))return true;return false}const grounded=()=>solidAt(player.pos.x,player.pos.y-1.68,player.pos.z)||solidAt(player.pos.x+.24,player.pos.y-1.68,player.pos.z)||solidAt(player.pos.x-.24,player.pos.y-1.68,player.pos.z);function resetPlayer(){player.pos.set(0,7,8);player.vel.set(0,0,0);player.yaw=0;player.pitch=-.12}function jump(){if(player.onGround&&survival.stamina>5){player.vel.y=7.6;survival.stamina-=5}}
+    function updatePlayer(dt){const fi=(keys.KeyW?1:0)-(keys.KeyS?1:0)-moveY,si=(keys.KeyD?1:0)-(keys.KeyA?1:0)+moveX,f=new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw)),r=new THREE.Vector3(Math.cos(player.yaw),0,Math.sin(player.yaw)),wish=f.multiplyScalar(fi).add(r.multiplyScalar(si));if(wish.lengthSq()>1)wish.normalize();const sprint=(keys.ShiftLeft||keys.ShiftRight)&&survival.stamina>1&&wish.lengthSq()>.01,speed=sprint?7.4:5.1;player.vel.x=THREE.MathUtils.lerp(player.vel.x,wish.x*speed,Math.min(1,dt*12));player.vel.z=THREE.MathUtils.lerp(player.vel.z,wish.z*speed,Math.min(1,dt*12));player.vel.y-=18.5*dt;player.onGround=grounded();if(player.onGround&&player.vel.y<0)player.vel.y=-.35;const px=player.pos.clone();px.x+=player.vel.x*dt;if(!collides(px))player.pos.x=px.x;else player.vel.x=0;const pz=player.pos.clone();pz.z+=player.vel.z*dt;if(!collides(pz))player.pos.z=pz.z;else player.vel.z=0;const py=player.pos.clone();py.y+=player.vel.y*dt;if(!collides(py))player.pos.y=py.y;else player.vel.y=0;if(player.pos.y<-20)resetPlayer();survival.stamina=Math.max(0,Math.min(100,survival.stamina+(sprint?-20:12)*dt));survival.hunger=Math.max(0,survival.hunger-.12*dt);survival.thirst=Math.max(0,survival.thirst-.2*dt);survival.sleep=Math.max(0,survival.sleep-.025*dt);survival.mental=Math.max(0,Math.min(100,survival.mental+(survival.hunger>25&&survival.thirst>25?.02:-.12)*dt));survival.health=Math.max(0,Math.min(100,(survival.hunger+survival.thirst+survival.sleep+survival.mental)/4));if(survival.hunger===0||survival.thirst===0)survival.life=Math.max(0,survival.life-.6*dt);camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;if(perspective==="first"){camera.position.copy(player.pos);hand.visible=true}else{hand.visible=false;const back=new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw)).multiplyScalar(-4.2);camera.position.copy(player.pos.clone().add(new THREE.Vector3(0,2,0)).add(back));camera.lookAt(player.pos.x,player.pos.y+1.1,player.pos.z)}}
+    function hitBlock(){raycaster.setFromCamera(new THREE.Vector2(0,0),camera);return raycaster.intersectObjects(worldGroup.children,false).find(h=>h.distance<7)}function breakBlock(){const h=hitBlock();if(!h)return;const o=h.object;if(o.userData.y<=-3)return;worldGroup.remove(o);blocks.delete(k(o.userData.x,o.userData.y,o.userData.z));gainXp(2);toast("ブロックを破壊")}function placeBlock(){const item=hotbar[selectedSlot],h=hitBlock();if(!h)return;const p=h.object.position.clone().add(h.face.normal).round();if(Math.abs(p.x-player.pos.x)<.8&&Math.abs(p.y-player.pos.y)<1.8&&Math.abs(p.z-player.pos.z)<.8)return;addBlock(p.x,p.y,p.z,item);gainXp(1);toast(`${item.name}を設置`)}
+    function attackMob(){raycaster.setFromCamera(new THREE.Vector2(0,0),camera);const h=raycaster.intersectObjects(mobGroup.children,true).find(h=>h.distance<5.5);if(!h){toast("攻撃は空振り");return}let root=h.object;while(root.parent&&root.parent!==mobGroup)root=root.parent;if(root.parent!==mobGroup)return;root.userData.hp-=2;if(root.userData.hp<=0){mobGroup.remove(root);const i=mobs.indexOf(root);if(i>=0)mobs.splice(i,1);gainXp(root.userData.hostile?14:5);toast(`${root.userData.name}を倒した`)}else toast("攻撃が命中")}function gainXp(v){survival.xp+=v;if(survival.xp>=100){survival.xp-=100;survival.level++;toast("レベルアップ！")}}function toggleView(){perspective=perspective==="first"?"third":"first";toast(perspective==="first"?"一人称視点":"三人称視点")}function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),1200)}
+    function updateHud(){for(const [id,v]of[["life",survival.life],["hunger",survival.hunger],["thirst",survival.thirst],["stamina",survival.stamina],["sleep",survival.sleep],["mental",survival.mental],["health",survival.health]]){$(`#${id}Fill`).style.width=`${v}%`;$(`#${id}Val`).textContent=Math.round(v)}$("#coords").textContent=`X ${player.pos.x.toFixed(1)} / Y ${player.pos.y.toFixed(1)} / Z ${player.pos.z.toFixed(1)}`;$("#levelText").textContent=`Lv.${survival.level}`;$("#xpText").textContent=`${survival.xp} / 100`}
+    function renderHotbar(){const h=$("#hotbar");h.innerHTML="";hotbar.forEach((item,i)=>{const b=document.createElement("button");b.className="slot"+(i===selectedSlot?" selected":"");b.innerHTML=`<div class="ico">${item.kind==="light"?"🔥":item.kind==="liquid"?"💧":item.kind==="farm"?"🌱":item.kind==="device"?"⚒️":item.kind==="storage"?"📦":item.id.startsWith("glass_")?"🔷":"🧱"}</div><div>${i+1}</div><div>${item.name}</div>`;b.onclick=()=>{selectedSlot=i;renderHotbar()};h.appendChild(b)})}
+    function renderWorlds(){const g=$("#worldGrid");g.innerHTML="";worlds.forEach(w=>{const b=document.createElement("button");b.className="world-card"+(w[0]===selectedWorld[0]?" active":"");b.innerHTML=`<strong>${w[1]}</strong><small>地形・空・水・モブ配置が変化します。</small>`;b.onclick=()=>{generateWorld(w);renderWorlds();hide("#worldOverlay");if(!running)start(false)};g.appendChild(b)})}
+    let currentCat="basic";function renderCatalog(){$("#catalogCount").textContent=`登録済み：${allItems.length}種類（200種類以上）`;const tabs=$("#catalogTabs");tabs.innerHTML="";Object.entries(catalog).forEach(([key,c])=>{const b=document.createElement("button");b.className="tab"+(key===currentCat?" active":"");b.textContent=c.label;b.onclick=()=>{currentCat=key;renderCatalog()};tabs.appendChild(b)});const grid=$("#catalogGrid");grid.innerHTML="";catalog[currentCat].items.forEach(item=>{const b=document.createElement("button");b.className="catalog-card";b.innerHTML=`<strong>${item.name}</strong><small>タップすると選択中のホットバーへ登録します。</small>`;b.onclick=()=>{hotbar[selectedSlot]=item;renderHotbar();toast(`${item.name}を登録`)};grid.appendChild(b)})}
+    function renderSystems(){const g=$("#systemGrid");g.innerHTML="";systems.forEach(s=>{const d=document.createElement("div");d.className="system-card";const a=["クラフト","採掘","建築","農業","アイテム収集","レベル","経験値"].includes(s);d.innerHTML=`<strong>${s}</strong><small>${a?"基礎機能を実装済み":"データ・UI登録済み。専用画面と詳細処理を順次追加"}</small>`;g.appendChild(d)})}
+    function renderBestiary(){const g=$("#bestiaryGrid");g.innerHTML="";const e=[...domestic.map(n=>[n,false,"家畜"]),...wild.map(n=>[n,false,"野生"]),...normalMonsters.map(n=>[n,true,"通常モンスター"]),...eliteMonsters.map(n=>[n,true,"上位種"])];e.forEach(([n,h,k])=>{const b=document.createElement("button");b.className="mob-card";b.innerHTML=`<strong>${n}</strong><small>${k} / タップで現在地付近へ召喚</small>`;b.onclick=()=>{spawnMob(n,h,player.pos.x+3+Math.random()*3,player.pos.z+3+Math.random()*3);toast(`${n}を召喚`)};g.appendChild(b)})}
+    function show(s){$(s).classList.remove("hidden");paused=true;document.exitPointerLock?.()}function hide(s){$(s).classList.add("hidden");paused=false;if(running&&matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}$$(".overlay .close").forEach(b=>b.onclick=()=>hide("#"+b.closest(".overlay").id));
+    function saveGame(){localStorage.setItem(SAVE_KEY,JSON.stringify({world:selectedWorld[0],player:{x:player.pos.x,y:player.pos.y,z:player.pos.z,yaw:player.yaw,pitch:player.pitch},survival,perspective,hotbar:hotbar.map(x=>x.id),blocks:[...blocks.values()].map(x=>x.userData)}));toast("保存しました")}function loadGame(){const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;try{const d=JSON.parse(raw),w=worlds.find(x=>x[0]===d.world)||worlds[0];generateWorld(w);while(worldGroup.children.length)worldGroup.remove(worldGroup.children[0]);blocks.clear();d.blocks.forEach(b=>{const item=allItems.find(x=>x.id===b.itemId)||catalog.basic.items[0];addBlock(b.x,b.y,b.z,item)});Object.assign(player.pos,d.player);player.yaw=d.player.yaw;player.pitch=d.player.pitch;Object.assign(survival,d.survival);perspective=d.perspective||"first";d.hotbar?.forEach((id,i)=>{const item=allItems.find(x=>x.id===id);if(item)hotbar[i]=item});seedMobs();return true}catch{return false}}
+    function start(load){if(!load||!loadGame())generateWorld(selectedWorld);$("#titleScreen").classList.add("hidden");$("#hud").classList.remove("hidden");$("#mobile").classList.remove("hidden");running=true;paused=false;renderHotbar();if(matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}
+    $("#hitNew").onclick=()=>start(false);$("#hitContinue").onclick=()=>start(true);$("#hitWorld").onclick=()=>{renderWorlds();show("#worldOverlay")};$("#hitSettings").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#hitHow").onclick=()=>show("#helpOverlay");$("#hitCredits").onclick=()=>alert("REAL CRAFT / にちかゲームズ");
+    $("#openCatalog").onclick=()=>{renderCatalog();show("#catalogOverlay")};$("#openBestiary").onclick=()=>{renderBestiary();show("#bestiaryOverlay")};$("#openSystems").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#openPause").onclick=()=>{paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()};
+    $("#resume").onclick=()=>{paused=false;$("#pauseOverlay").classList.add("hidden");renderer.domElement.requestPointerLock?.()};$("#save").onclick=saveGame;$("#pauseCatalog").onclick=()=>{renderCatalog();$("#pauseOverlay").classList.add("hidden");show("#catalogOverlay")};$("#pauseWorld").onclick=()=>{renderWorlds();$("#pauseOverlay").classList.add("hidden");show("#worldOverlay")};$("#toTitle").onclick=()=>{saveGame();running=false;paused=false;$("#pauseOverlay").classList.add("hidden");$("#hud").classList.add("hidden");$("#mobile").classList.add("hidden");$("#titleScreen").classList.remove("hidden")};
+    addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});addEventListener("keydown",e=>{keys[e.code]=true;if(/^Digit[1-8]$/.test(e.code)){selectedSlot=Number(e.code.at(-1))-1;renderHotbar()}if(e.code==="Space")jump();if(e.code==="KeyF")attackMob();if(e.code==="KeyV")toggleView();if(e.code==="KeyB"){renderCatalog();show("#catalogOverlay")}if(e.code==="KeyM"){renderBestiary();show("#bestiaryOverlay")}if(e.code==="Escape"&&running){paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()}});addEventListener("keyup",e=>keys[e.code]=false);
+    addEventListener("mousemove",e=>{if(document.pointerLockElement!==renderer.domElement||paused)return;player.yaw-=e.movementX*.0024;player.pitch=THREE.MathUtils.clamp(player.pitch-e.movementY*.0024,-1.48,1.48)});renderer.domElement.addEventListener("click",()=>{if(running&&!paused&&matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()});renderer.domElement.addEventListener("mousedown",e=>{if(!running||paused||document.pointerLockElement!==renderer.domElement)return;if(e.button===0)breakBlock();if(e.button===2)placeBlock()});renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
+    $("#jump").onpointerdown=jump;$("#break").onpointerdown=breakBlock;$("#place").onpointerdown=placeBlock;$("#attack").onpointerdown=attackMob;$("#view").onpointerdown=toggleView;$("#catalog").onpointerdown=()=>{renderCatalog();show("#catalogOverlay")};$("#menu").onpointerdown=()=>{$("#pauseOverlay").classList.remove("hidden");paused=true};
+    const look=$("#lookZone");let lid=null,lx=0,ly=0;look.onpointerdown=e=>{lid=e.pointerId;lx=e.clientX;ly=e.clientY;look.setPointerCapture(lid)};look.onpointermove=e=>{if(e.pointerId!==lid||paused)return;const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;player.yaw-=dx*.006;player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.006,-1.48,1.48)};look.onpointerup=e=>{if(e.pointerId===lid)lid=null};
+    const pad=$("#movePad"),knob=$("#moveKnob");let mid=null;function mv(e){const r=pad.getBoundingClientRect();let dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2,max=r.width*.32,l=Math.hypot(dx,dy)||1;if(l>max){dx=dx/l*max;dy=dy/l*max}moveX=dx/max;moveY=dy/max;knob.style.transform=`translate(${dx}px,${dy}px)`}pad.onpointerdown=e=>{mid=e.pointerId;pad.setPointerCapture(mid);mv(e)};pad.onpointermove=e=>{if(e.pointerId===mid)mv(e)};function stop(e){if(e.pointerId!==mid)return;mid=null;moveX=moveY=0;knob.style.transform=""}pad.onpointerup=stop;pad.onpointercancel=stop;
+    function loop(now){requestAnimationFrame(loop);const dt=Math.min(.034,(now-last)/1000);last=now;if(running&&!paused){updatePlayer(dt);updateMobs(dt);updateHud()}renderer.render(scene,camera)}renderHotbar();renderWorlds();renderCatalog();renderSystems();renderBestiary();requestAnimationFrame(loop);
   </script>
 </body>
 </html>
