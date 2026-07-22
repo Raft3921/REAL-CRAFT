@@ -20,7 +20,7 @@
     .panel{border:1px solid var(--line);background:var(--panel-strong);backdrop-filter:blur(12px);border-radius:20px;padding:18px;box-shadow:0 18px 55px rgba(0,0,0,.35)}
     .hudbtn{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.07);color:#fff;padding:10px 13px;font-weight:800}
 
-    #titleScreen{position:fixed;inset:0;z-index:50;background:#05080d url("./assets/title-bg.png") center/cover no-repeat}
+    #titleScreen{position:fixed;inset:0;z-index:50;background:#000 url("./assets/title-full.jpg") center/contain no-repeat}
     .title-hit{position:absolute;border:0;background:transparent;color:transparent;cursor:pointer;border-radius:14px}
     .title-hit:focus-visible{outline:4px solid #fff4b2;background:rgba(255,244,178,.08)}
     #hitNew{left:3.2%;top:34%;width:21.8%;height:7.4%}#hitContinue{left:3.2%;top:42%;width:21.8%;height:7.2%}
@@ -65,7 +65,7 @@
     #place{right:20px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}#attack{right:91px;bottom:max(109px,calc(env(safe-area-inset-bottom) + 96px))}
     #view{right:162px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}#menu{right:233px;bottom:max(31px,calc(env(safe-area-inset-bottom) + 22px))}
     #catalog{right:162px;bottom:max(109px,calc(env(safe-area-inset-bottom) + 96px))}
-    @media(pointer:fine){#mobile{display:none}}@media(max-width:900px){#topLeft{width:45vw}#topRight{width:38vw}.stat{grid-template-columns:55px 1fr 50px;font-size:10px}.slot{width:52px;height:56px}}
+    #mobile{display:none!important}@media(max-width:900px){#topLeft{width:45vw}#topRight{width:38vw}.stat{grid-template-columns:55px 1fr 50px;font-size:10px}.slot{width:52px;height:56px}}
   
     #realHands{
       position:fixed;inset:0;z-index:12;pointer-events:none;overflow:hidden
@@ -126,6 +126,53 @@
     #mineProgress.show{opacity:1}
     #mineProgress>div{height:100%;background:#f4d675;width:0%}
     @media(max-width:820px){#inventoryOverlay .invLayout{grid-template-columns:1fr}}
+  
+    #titleArrow{
+      position:absolute;width:34px;height:34px;pointer-events:none;z-index:3;
+      filter:drop-shadow(0 0 8px rgba(255,220,100,.85));
+      transform:translate(-6px,-50%);
+    }
+    #titleArrow::before{
+      content:"";position:absolute;inset:0;
+      clip-path:polygon(0 0,100% 50%,0 100%,22% 57%);
+      background:linear-gradient(135deg,#fff3a5,#d89d18 70%);
+      border-radius:3px;
+    }
+    #saveLive{
+      position:absolute;right:2.3%;top:50.2%;width:19.3%;height:23.4%;
+      padding:14px 14px 12px;border-radius:14px;background:rgba(5,11,20,.86);
+      border:1px solid rgba(224,190,104,.58);color:#f4e6bd;
+      display:flex;flex-direction:column;gap:7px;font-size:clamp(10px,1.05vw,15px);
+      box-shadow:inset 0 0 0 2px rgba(224,190,104,.08)
+    }
+    #saveLive h3{margin:0 0 4px;font-size:1.1em}
+    #saveThumbLive{height:44%;border-radius:9px;background:linear-gradient(145deg,#6eb0ef,#244a6e);position:relative;overflow:hidden}
+    #saveThumbLive::after{content:"";position:absolute;left:12%;right:12%;bottom:12%;height:55%;background:linear-gradient(#6d9d49,#34582e);clip-path:polygon(0 60%,18% 32%,36% 52%,54% 20%,72% 43%,100% 18%,100% 100%,0 100%)}
+    #saveLive .muted{opacity:.76}
+    .title-hit.hovering{outline:3px solid rgba(255,219,106,.75);background:rgba(255,219,106,.08)}
+    #pcOnlyBadge{position:absolute;left:1.3%;bottom:1.2%;padding:7px 10px;border-radius:10px;background:rgba(0,0,0,.58);font-size:12px;color:#f4dfaa;border:1px solid rgba(244,223,170,.35)}
+
+    /* Compact HUD matching the earlier requested style */
+    #topLeft{width:min(430px,42vw)}
+    #topRight{width:min(300px,30vw)}
+    #topLeft .stat{grid-template-columns:62px 1fr 72px}
+    #topLeft .stat:nth-of-type(n+5){display:none}
+    #topLeft .stat:nth-of-type(3){display:none}
+    #topLeft .stat:nth-of-type(4){display:none}
+    #topLeft .stat:nth-of-type(5){display:none}
+    #topLeft .stat:nth-of-type(6){display:none}
+    #topLeft .stat:nth-of-type(7){display:none}
+    #topLeft .stat:nth-of-type(8){display:none}
+    #topRight>div:nth-child(2)::before{content:"LEVEL / "}
+    #topRight>div:nth-child(3),#topRight>div:nth-child(4){display:none}
+    #roundGauge{
+      width:92px;height:92px;border-radius:50%;display:grid;place-items:center;
+      background:conic-gradient(#6fd7ff 0deg,#6fd7ff 300deg,rgba(255,255,255,.12) 300deg);
+      box-shadow:inset 0 0 0 11px rgba(0,0,0,.36);margin:10px auto 4px
+    }
+    #roundGaugeInner{width:60px;height:60px;border-radius:50%;background:#101923;display:grid;place-items:center;font-weight:900}
+    #attributeStrip{display:none!important}
+
   </style>
 </head>
 <body>
@@ -133,7 +180,16 @@
     <button id="hitNew" class="title-hit" aria-label="はじめから"></button><button id="hitContinue" class="title-hit" aria-label="つづきから"></button>
     <button id="hitWorld" class="title-hit" aria-label="ワールド選択"></button><button id="hitSettings" class="title-hit" aria-label="設定"></button>
     <button id="hitHow" class="title-hit" aria-label="遊び方"></button><button id="hitCredits" class="title-hit" aria-label="クレジット"></button>
-    <div id="buildTag">BUILD 1.0 — 基礎システム完成版</div>
+    
+    <div id="titleArrow"></div>
+    <div id="saveLive">
+      <h3>最新のセーブデータ</h3>
+      <div id="saveThumbLive"></div>
+      <div id="saveLiveText" class="muted">セーブデータがありません。</div>
+    </div>
+    <div id="pcOnlyBadge">PC版 / WASD操作</div>
+
+    <div id="buildTag">BUILD 1.1 — PC専用・3Dモデル強化版</div>
   </div>
 
   <div id="worldOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>🌍 ワールド選択</h2><div style="opacity:.7">13種類の環境を選択できます。</div></div><button class="hudbtn close">閉じる</button></div><div id="worldGrid" class="world-grid"></div></div></div>
@@ -187,7 +243,7 @@
       <div class="stat"><span>精神</span><div class="track"><div id="mentalFill" class="fill"></div></div><span id="mentalVal"></span></div>
       <div class="stat"><span>健康</span><div class="track"><div id="healthFill" class="fill"></div></div><span id="healthVal"></span></div>
     </div>
-    <div id="topRight"><div class="titleRow"><span id="biomeName">草原</span><span id="levelText">Lv.1</span></div><div>経験値：<span id="xpText">0 / 100</span></div><div>属性：火1 / 水1 / 風1 / 土1 / 光1 / 闇1</div><div>周辺モブ：<span id="mobCount">0</span></div><div id="rightButtons"><button class="hudbtn" id="openInventory">所持品</button><button class="hudbtn" id="openAttributes">属性</button><button class="hudbtn" id="openCatalog">カタログ</button><button class="hudbtn" id="openBestiary">モブ</button><button class="hudbtn" id="openSystems">システム</button><button class="hudbtn" id="openPause">ポーズ</button></div></div>
+    <div id="topRight"><div class="titleRow"><span id="biomeName">草原</span><span id="levelText">Lv.1</span></div><div>経験値：<span id="xpText">0 / 100</span></div><div>属性：火1 / 水1 / 風1 / 土1 / 光1 / 闇1</div><div>周辺モブ：<span id="mobCount">0</span></div><div id="roundGauge"><div id="roundGaugeInner">100</div></div><div id="rightButtons"><button class="hudbtn" id="openInventory">所持品</button><button class="hudbtn" id="openCatalog">カタログ</button><button class="hudbtn" id="openBestiary">モブ</button><button class="hudbtn" id="openSystems">システム</button><button class="hudbtn" id="openPause">ポーズ</button></div></div>
     <div id="toast"></div><div id="hotbarWrap"><div id="hint">破壊 / 設置 / 攻撃 / 視点変更が使用できます</div><div id="hotbar"></div></div>
   </div>
 
@@ -197,11 +253,49 @@
     <img id="rightRealHand" class="realHand" src="./assets/ren-right-hand.png" alt="">
   </div>
 
-  <div id="mobile" class="hidden"><div id="lookZone"></div><div id="movePad"><div id="moveKnob"></div></div><button id="jump" class="action">跳</button><button id="break" class="action">壊</button><button id="place" class="action">置</button><button id="attack" class="action">攻</button><button id="view" class="action">視</button><button id="catalog" class="action">本</button><button id="menu" class="action">≡</button></div>
+  <div id="mobile" class="hidden" aria-hidden="true"><div id="lookZone"></div><div id="movePad"><div id="moveKnob"></div></div><button id="jump" class="action">跳</button><button id="break" class="action">壊</button><button id="place" class="action">置</button><button id="attack" class="action">攻</button><button id="view" class="action">視</button><button id="catalog" class="action">本</button><button id="menu" class="action">≡</button></div>
 
   <script type="module">
     import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js/+esm";
-    const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],SAVE_KEY="real-craft-save-v05";
+    const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],SAVE_KEY="real-craft-save-v11";
+
+    const titleArrow=$("#titleArrow");
+    const titleButtons=[
+      ["#hitNew",()=>start(false)],["#hitContinue",()=>start(true)],
+      ["#hitWorld",()=>{renderWorlds();show("#worldOverlay")}],
+      ["#hitSettings",()=>{renderSystems();show("#systemsOverlay")}],
+      ["#hitHow",()=>show("#helpOverlay")],["#hitCredits",()=>alert("REAL CRAFT / にちかゲームズ")]
+    ];
+    let hoverTimer=null;
+    function moveTitleArrowTo(btn){
+      const r=btn.getBoundingClientRect(),tr=$("#titleScreen").getBoundingClientRect();
+      titleArrow.style.left=`${r.left-tr.left+r.width-8}px`;
+      titleArrow.style.top=`${r.top-tr.top+r.height/2}px`;
+    }
+    function setupTitleHover(){
+      titleButtons.forEach(([sel,action])=>{
+        const btn=$(sel);
+        btn.addEventListener("pointerenter",()=>{
+          clearTimeout(hoverTimer);
+          titleButtons.forEach(([s])=>$(s).classList.remove("hovering"));
+          btn.classList.add("hovering");moveTitleArrowTo(btn);
+          hoverTimer=setTimeout(()=>{btn.classList.remove("hovering");action()},280);
+        });
+        btn.addEventListener("pointerleave",()=>{clearTimeout(hoverTimer);btn.classList.remove("hovering")});
+      });
+      moveTitleArrowTo($("#hitNew"));
+    }
+    function updateSavePanel(){
+      const raw=localStorage.getItem(SAVE_KEY),box=$("#saveLiveText");
+      if(!raw){box.innerHTML="セーブデータがありません。<br>「はじめから」で新しい世界を作成できます。";return}
+      try{
+        const d=JSON.parse(raw),worldName=(worlds.find(w=>w[0]===d.world)||worlds[0])[1];
+        const p=d.player||{x:0,y:0,z:0},lv=d.survival?.level||1,xp=d.survival?.xp||0;
+        const saved=d.savedAt||"保存日時不明";
+        box.innerHTML=`ワールド：${worldName}<br>座標：${p.x.toFixed?.(1)??p.x}, ${p.y.toFixed?.(1)??p.y}, ${p.z.toFixed?.(1)??p.z}<br>レベル：${lv}（EXP ${xp}/100）<br>最終保存：${saved}`;
+      }catch{box.textContent="セーブデータを読み込めませんでした。"}
+    }
+
     
     const attributes15 = [{"id": "normal", "name": "ノーマル", "mark": "./assets/attributes-exact/01-normal.png", "slime": "./assets/slimes/01-normal.webp", "slimeGame": "./assets/slimes-game/01-normal.png", "slimeName": "プレーンスライム"}, {"id": "fire", "name": "火", "mark": "./assets/attributes-exact/02-fire.png", "slime": "./assets/slimes/02-fire.webp", "slimeGame": "./assets/slimes-game/02-fire.png", "slimeName": "フレイムスライム"}, {"id": "water", "name": "水", "mark": "./assets/attributes-exact/03-water.png", "slime": "./assets/slimes/03-water.webp", "slimeGame": "./assets/slimes-game/03-water.png", "slimeName": "アクアスライム"}, {"id": "nature", "name": "自然", "mark": "./assets/attributes-exact/04-nature.png", "slime": "./assets/slimes/04-nature.webp", "slimeGame": "./assets/slimes-game/04-nature.png", "slimeName": "リーフスライム"}, {"id": "light", "name": "光", "mark": "./assets/attributes-exact/05-light.png", "slime": "./assets/slimes/05-light.webp", "slimeGame": "./assets/slimes-game/05-light.png", "slimeName": "ルミナススライム"}, {"id": "dark", "name": "闇", "mark": "./assets/attributes-exact/06-dark.png", "slime": "./assets/slimes/06-dark.webp", "slimeGame": "./assets/slimes-game/06-dark.png", "slimeName": "シャドウスライム"}, {"id": "thunder", "name": "雷", "mark": "./assets/attributes-exact/07-thunder.png", "slime": "./assets/slimes/07-thunder.webp", "slimeGame": "./assets/slimes-game/07-thunder.png", "slimeName": "サンダースライム"}, {"id": "ice", "name": "氷", "mark": "./assets/attributes-exact/08-ice.png", "slime": "./assets/slimes/08-ice.webp", "slimeGame": "./assets/slimes-game/08-ice.png", "slimeName": "フロストスライム"}, {"id": "wind", "name": "風", "mark": "./assets/attributes-exact/09-wind.png", "slime": "./assets/slimes/09-wind.webp", "slimeGame": "./assets/slimes-game/09-wind.png", "slimeName": "ゲイルスライム"}, {"id": "earth", "name": "土", "mark": "./assets/attributes-exact/10-earth.png", "slime": "./assets/slimes/10-earth.webp", "slimeGame": "./assets/slimes-game/10-earth.png", "slimeName": "アーススライム"}, {"id": "metal", "name": "金属", "mark": "./assets/attributes-exact/11-metal.png", "slime": "./assets/slimes/11-metal.webp", "slimeGame": "./assets/slimes-game/11-metal.png", "slimeName": "メタルスライム"}, {"id": "time", "name": "時", "mark": "./assets/attributes-exact/12-time.png", "slime": "./assets/slimes/12-time.webp", "slimeGame": "./assets/slimes-game/12-time.png", "slimeName": "クロノスライム"}, {"id": "space", "name": "空間", "mark": "./assets/attributes-exact/13-space.png", "slime": "./assets/slimes/13-space.webp", "slimeGame": "./assets/slimes-game/13-space.png", "slimeName": "ヴォイドスライム"}, {"id": "poison", "name": "毒", "mark": "./assets/attributes-exact/14-poison.png", "slime": "./assets/slimes/14-poison.webp", "slimeGame": "./assets/slimes-game/14-poison.png", "slimeName": "ヴェノムスライム"}, {"id": "life", "name": "生命", "mark": "./assets/attributes-exact/15-life.png", "slime": "./assets/slimes/15-life.webp", "slimeGame": "./assets/slimes-game/15-life.png", "slimeName": "ライフスライム"}];
 
@@ -389,9 +483,35 @@
         else u.speed=.32
       }
       m.position.x+=Math.cos(u.dir)*u.speed*dt;m.position.z+=Math.sin(u.dir)*u.speed*dt;m.position.y=4+Math.sin(u.phase*2)*.08;if(!m.children.some(c=>c.isSprite))m.rotation.y=-u.dir+Math.PI/2}$("#mobCount").textContent=mobs.length}
+    
+    const renModel=new THREE.Group();
+    function addPart(geo,mat,pos,scale=[1,1,1],rot=[0,0,0]){
+      const m=new THREE.Mesh(geo,mat);m.position.set(...pos);m.scale.set(...scale);m.rotation.set(...rot);m.castShadow=true;m.receiveShadow=true;renModel.add(m);return m
+    }
+    const renSkin=new THREE.MeshStandardMaterial({color:0xc99670,roughness:.72});
+    const renHair=new THREE.MeshStandardMaterial({color:0x2e211b,roughness:.9});
+    const renShorts=new THREE.MeshStandardMaterial({color:0x3b342f,roughness:.95});
+    const renEyes=new THREE.MeshBasicMaterial({color:0x2b211e});
+    const torso=addPart(new THREE.CapsuleGeometry(.34,.9,8,16),renSkin,[0,.95,0],[1.05,1.08,.72]);
+    const head=addPart(new THREE.SphereGeometry(.29,20,16),renSkin,[0,1.83,0],[.95,1.08,.92]);
+    const neck=addPart(new THREE.CylinderGeometry(.105,.12,.22,12),renSkin,[0,1.54,0]);
+    const shorts=addPart(new THREE.BoxGeometry(.66,.48,.46),renShorts,[0,.25,0],[1,1,1]);
+    for(const sx of[-1,1]){
+      addPart(new THREE.CapsuleGeometry(.105,.55,6,12),renSkin,[.48*sx,1.02,0],[1,1,1],[0,0,.14*sx]);
+      addPart(new THREE.CapsuleGeometry(.09,.5,6,12),renSkin,[.58*sx,.48,0],[1,1,1],[0,0,.09*sx]);
+      addPart(new THREE.CapsuleGeometry(.14,.72,6,12),renSkin,[.22*sx,-.55,0],[1,1,1],[0,0,.02*sx]);
+      addPart(new THREE.SphereGeometry(.15,14,10),renSkin,[.22*sx,-1.32,.12],[1.2,.45,1.8]);
+      const eye=addPart(new THREE.SphereGeometry(.025,8,8),renEyes,[.10*sx,1.87,.26],[1,1,.55]);
+    }
+    for(let i=0;i<12;i++){
+      const a=i/12*Math.PI*2;
+      const hair=addPart(new THREE.ConeGeometry(.08,.34,7),renHair,[Math.cos(a)*.22,2.06+Math.sin(i*.8)*.04,Math.sin(a)*.21],[1,1,1],[Math.sin(a)*.42,0,-Math.cos(a)*.42]);
+    }
+    renModel.position.copy(player.pos);renModel.visible=false;scene.add(renModel);
+
     const hand=new THREE.Group(),skin=new THREE.MeshStandardMaterial({color:0xd7ae88,roughness:.82}),sleeve=new THREE.MeshStandardMaterial({color:0x2d77a9,roughness:.9});function arm(s){const g=new THREE.Group(),a=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.32,5,10),sleeve),h=new THREE.Mesh(new THREE.CapsuleGeometry(.075,.24,5,10),skin);a.position.y=-.05;h.position.y=-.36;g.add(a,h);g.position.set(.35*s,-.28,-.67);g.rotation.x=-.35;g.rotation.z=.14*s;return g}const leftHand=arm(-1),rightHand=arm(1);hand.add(leftHand,rightHand);camera.add(hand);scene.add(camera);hand.visible=false;
     const solidAt=(x,y,z)=>blocks.has(k(Math.round(x),Math.round(y),Math.round(z)));function collides(p){for(const y of[p.y-1.35,p.y-.45,p.y+.35])for(const x of[p.x-.28,p.x+.28])for(const z of[p.z-.28,p.z+.28])if(solidAt(x,y,z))return true;return false}const grounded=()=>solidAt(player.pos.x,player.pos.y-1.68,player.pos.z)||solidAt(player.pos.x+.24,player.pos.y-1.68,player.pos.z)||solidAt(player.pos.x-.24,player.pos.y-1.68,player.pos.z);function resetPlayer(){player.pos.set(0,7,8);player.vel.set(0,0,0);player.yaw=0;player.pitch=-.12}function jump(){if(player.onGround&&survival.stamina>5){player.vel.y=7.6;survival.stamina-=5}}
-    function updatePlayer(dt){const fi=(keys.KeyW?1:0)-(keys.KeyS?1:0)-moveY,si=(keys.KeyD?1:0)-(keys.KeyA?1:0)+moveX,f=new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw)),r=new THREE.Vector3(Math.cos(player.yaw),0,Math.sin(player.yaw)),wish=f.multiplyScalar(fi).add(r.multiplyScalar(si));if(wish.lengthSq()>1)wish.normalize();const sprint=(keys.ShiftLeft||keys.ShiftRight)&&survival.stamina>1&&wish.lengthSq()>.01,speed=sprint?7.4:5.1;player.vel.x=THREE.MathUtils.lerp(player.vel.x,wish.x*speed,Math.min(1,dt*12));player.vel.z=THREE.MathUtils.lerp(player.vel.z,wish.z*speed,Math.min(1,dt*12));player.vel.y-=18.5*dt;player.onGround=grounded();if(player.onGround&&player.vel.y<0)player.vel.y=-.35;const px=player.pos.clone();px.x+=player.vel.x*dt;if(!collides(px))player.pos.x=px.x;else player.vel.x=0;const pz=player.pos.clone();pz.z+=player.vel.z*dt;if(!collides(pz))player.pos.z=pz.z;else player.vel.z=0;const py=player.pos.clone();py.y+=player.vel.y*dt;if(!collides(py))player.pos.y=py.y;else player.vel.y=0;if(player.pos.y<-20)resetPlayer();survival.stamina=Math.max(0,Math.min(100,survival.stamina+(sprint?-20:12)*dt));survival.hunger=Math.max(0,survival.hunger-.12*dt);survival.thirst=Math.max(0,survival.thirst-.2*dt);survival.sleep=Math.max(0,survival.sleep-.025*dt);survival.mental=Math.max(0,Math.min(100,survival.mental+(survival.hunger>25&&survival.thirst>25?.02:-.12)*dt));survival.health=Math.max(0,Math.min(100,(survival.hunger+survival.thirst+survival.sleep+survival.mental)/4));if(survival.hunger===0||survival.thirst===0)survival.life=Math.max(0,survival.life-.6*dt);camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;if(perspective==="first"){
+    function updatePlayer(dt){const fi=(keys.KeyW?1:0)-(keys.KeyS?1:0),si=(keys.KeyD?1:0)-(keys.KeyA?1:0),f=new THREE.Vector3(Math.sin(player.yaw),0,-Math.cos(player.yaw)),r=new THREE.Vector3(Math.cos(player.yaw),0,Math.sin(player.yaw)),wish=f.multiplyScalar(fi).add(r.multiplyScalar(si));if(wish.lengthSq()>1)wish.normalize();const sprint=(keys.ShiftLeft||keys.ShiftRight)&&survival.stamina>1&&wish.lengthSq()>.01,speed=sprint?7.4:5.1;player.vel.x=THREE.MathUtils.lerp(player.vel.x,wish.x*speed,Math.min(1,dt*12));player.vel.z=THREE.MathUtils.lerp(player.vel.z,wish.z*speed,Math.min(1,dt*12));player.vel.y-=18.5*dt;player.onGround=grounded();if(player.onGround&&player.vel.y<0)player.vel.y=-.35;const px=player.pos.clone();px.x+=player.vel.x*dt;if(!collides(px))player.pos.x=px.x;else player.vel.x=0;const pz=player.pos.clone();pz.z+=player.vel.z*dt;if(!collides(pz))player.pos.z=pz.z;else player.vel.z=0;const py=player.pos.clone();py.y+=player.vel.y*dt;if(!collides(py))player.pos.y=py.y;else player.vel.y=0;if(player.pos.y<-20)resetPlayer();survival.stamina=Math.max(0,Math.min(100,survival.stamina+(sprint?-20:12)*dt));survival.hunger=Math.max(0,survival.hunger-.12*dt);survival.thirst=Math.max(0,survival.thirst-.2*dt);survival.sleep=Math.max(0,survival.sleep-.025*dt);survival.mental=Math.max(0,Math.min(100,survival.mental+(survival.hunger>25&&survival.thirst>25?.02:-.12)*dt));survival.health=Math.max(0,Math.min(100,(survival.hunger+survival.thirst+survival.sleep+survival.mental)/4));if(survival.hunger===0||survival.thirst===0)survival.life=Math.max(0,survival.life-.6*dt);camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;renModel.position.set(player.pos.x,player.pos.y-1.5,player.pos.z);renModel.rotation.y=player.yaw;renModel.visible=perspective==="third";if(perspective==="first"){
         camera.position.copy(player.pos);
         const walk=Math.min(1,Math.abs(fi)+Math.abs(si));
         $("#realHands").classList.toggle("walking",walk>.15);
@@ -430,13 +550,13 @@
     }
 
     function hitBlock(){raycaster.setFromCamera(new THREE.Vector2(0,0),camera);return raycaster.intersectObjects(worldGroup.children,false).find(h=>h.distance<7)}function breakBlock(){startMine()}function placeBlock(){const item=hotbar[selectedSlot],h=hitBlock();if(!h)return;const p=h.object.position.clone().add(h.face.normal).round();if(Math.abs(p.x-player.pos.x)<.8&&Math.abs(p.y-player.pos.y)<1.8&&Math.abs(p.z-player.pos.z)<.8)return;addBlock(p.x,p.y,p.z,item);gainXp(1);toast(`${item.name}を設置`)}
-    function attackMob(){raycaster.setFromCamera(new THREE.Vector2(0,0),camera);const h=raycaster.intersectObjects(mobGroup.children,true).find(h=>h.distance<5.5);if(!h){toast("攻撃は空振り");return}let root=h.object;while(root.parent&&root.parent!==mobGroup)root=root.parent;if(root.parent!==mobGroup)return;root.userData.hp-=2;if(root.userData.hp<=0){if(root.userData.attribute)survival.proficiency[root.userData.attribute]=(survival.proficiency[root.userData.attribute]||1)+2;mobGroup.remove(root);const i=mobs.indexOf(root);if(i>=0)mobs.splice(i,1);gainXp(root.userData.hostile?14:5);toast(`${root.userData.name}を倒した`)}else toast("攻撃が命中")}function gainXp(v){survival.xp+=v;if(survival.xp>=100){survival.xp-=100;survival.level++;toast("レベルアップ！")}}function applyPerspective(){
+    function attackMob(){raycaster.setFromCamera(new THREE.Vector2(0,0),camera);const h=raycaster.intersectObjects(mobGroup.children,true).find(h=>h.distance<5.5);if(!h){toast("攻撃は空振り");return}let root=h.object;while(root.parent&&root.parent!==mobGroup)root=root.parent;if(root.parent!==mobGroup)return;root.userData.hp-=2;if(root.userData.hp<=0){if(root.userData.attribute)survival.proficiency[root.userData.attribute]=(survival.proficiency[root.userData.attribute]||1)+2;mobGroup.remove(root);const i=mobs.indexOf(root);if(i>=0)mobs.splice(i,1);gainXp(root.userData.hostile?14:5);toast(`${root.userData.name}を倒した`)}else toast("攻撃が命中")}function gainXp(v){survival.xp+=v;if(survival.xp>=100){survival.xp-=100;survival.level++;toast("レベルアップ！")}}function applyPerspective(){renModel.visible=perspective==="third";
       const rh=$("#realHands");
       rh.classList.toggle("third",perspective!=="first");
       hand.visible=false;
     }
     function toggleView(){perspective=perspective==="first"?"third":"first";applyPerspective();toast(perspective==="first"?"一人称視点":"三人称視点")}function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),1200)}
-    function updateHud(){for(const [id,v]of[["life",survival.life],["hunger",survival.hunger],["thirst",survival.thirst],["stamina",survival.stamina],["sleep",survival.sleep],["mental",survival.mental],["health",survival.health]]){$(`#${id}Fill`).style.width=`${v}%`;$(`#${id}Val`).textContent=Math.round(v)}$("#coords").textContent=`X ${player.pos.x.toFixed(1)} / Y ${player.pos.y.toFixed(1)} / Z ${player.pos.z.toFixed(1)}`;$("#levelText").textContent=`Lv.${survival.level}`;$("#xpText").textContent=`${survival.xp} / 100`}
+    function updateHud(){for(const [id,v]of[["life",survival.life],["hunger",survival.hunger],["thirst",survival.thirst],["stamina",survival.stamina],["sleep",survival.sleep],["mental",survival.mental],["health",survival.health]]){$(`#${id}Fill`).style.width=`${v}%`;$(`#${id}Val`).textContent=Math.round(v)}$("#coords").textContent=`X ${player.pos.x.toFixed(1)} / Y ${player.pos.y.toFixed(1)} / Z ${player.pos.z.toFixed(1)}`;$("#levelText").textContent=`Lv.${survival.level}`;$("#xpText").textContent=`${survival.xp} / 100`;$("#roundGauge").style.background=`conic-gradient(#6fd7ff 0deg,#6fd7ff ${survival.stamina*3.6}deg,rgba(255,255,255,.12) ${survival.stamina*3.6}deg)`;$("#roundGaugeInner").textContent=Math.round(survival.stamina)}
     function renderHotbar(){const h=$("#hotbar");h.innerHTML="";hotbar.forEach((item,i)=>{const b=document.createElement("button");b.className="slot"+(i===selectedSlot?" selected":"");b.innerHTML=`<div class="ico">${item.kind==="light"?"🔥":item.kind==="liquid"?"💧":item.kind==="farm"?"🌱":item.kind==="device"?"⚒️":item.kind==="storage"?"📦":item.id.startsWith("glass_")?"🔷":"🧱"}</div><div>${i+1}</div><div>${item.name}</div>`;b.onclick=()=>{selectedSlot=i;renderHotbar()};h.appendChild(b)})}
     
     let attributeMode="marks";
@@ -476,10 +596,10 @@
     function renderSystems(){const g=$("#systemGrid");g.innerHTML="";systems.forEach(s=>{const d=document.createElement("div");d.className="system-card";const a=["クラフト","採掘","建築","農業","アイテム収集","レベル","経験値"].includes(s);d.innerHTML=`<strong>${s}</strong><small>${a?"基礎機能を実装済み":"データ・UI登録済み。専用画面と詳細処理を順次追加"}</small>`;g.appendChild(d)})}
     function renderBestiary(){const g=$("#bestiaryGrid");g.innerHTML="";const e=[...domestic.map(n=>[n,false,"家畜"]),...wild.map(n=>[n,false,"野生"]),...normalMonsters.map(n=>[n,true,"通常モンスター"]),...eliteMonsters.map(n=>[n,true,"上位種"])];e.forEach(([n,h,k])=>{const b=document.createElement("button");b.className="mob-card";b.innerHTML=`<strong>${n}</strong><small>${k} / タップで現在地付近へ召喚</small>`;b.onclick=()=>{spawnMob(n,h,player.pos.x+3+Math.random()*3,player.pos.z+3+Math.random()*3);toast(`${n}を召喚`)};g.appendChild(b)})}
     function show(s){$(s).classList.remove("hidden");paused=true;document.exitPointerLock?.()}function hide(s){$(s).classList.add("hidden");paused=false;if(running&&matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}$$(".overlay .close").forEach(b=>b.onclick=()=>hide("#"+b.closest(".overlay").id));$$("#attributeModeTabs .tab").forEach(b=>b.onclick=()=>{$$("#attributeModeTabs .tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");attributeMode=b.dataset.mode;renderAttributeGrid()});
-    function saveGame(){localStorage.setItem(SAVE_KEY,JSON.stringify({world:selectedWorld[0],player:{x:player.pos.x,y:player.pos.y,z:player.pos.z,yaw:player.yaw,pitch:player.pitch},survival,perspective,hotbar:hotbar.map(x=>x.id),inventory,blocks:[...blocks.values()].map(x=>x.userData)}));toast("保存しました")}function loadGame(){const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;try{const d=JSON.parse(raw),w=worlds.find(x=>x[0]===d.world)||worlds[0];generateWorld(w);while(worldGroup.children.length)worldGroup.remove(worldGroup.children[0]);blocks.clear();d.blocks.forEach(b=>{const item=allItems.find(x=>x.id===b.itemId)||catalog.basic.items[0];addBlock(b.x,b.y,b.z,item)});Object.assign(player.pos,d.player);player.yaw=d.player.yaw;player.pitch=d.player.pitch;Object.assign(survival,d.survival);if(d.inventory)Object.assign(inventory,d.inventory);perspective=d.perspective||"first";d.hotbar?.forEach((id,i)=>{const item=allItems.find(x=>x.id===id);if(item)hotbar[i]=item});seedMobs();return true}catch{return false}}
+    function saveGame(){localStorage.setItem(SAVE_KEY,JSON.stringify({savedAt:new Date().toLocaleString("ja-JP"),world:selectedWorld[0],player:{x:player.pos.x,y:player.pos.y,z:player.pos.z,yaw:player.yaw,pitch:player.pitch},survival,perspective,hotbar:hotbar.map(x=>x.id),inventory,blocks:[...blocks.values()].map(x=>x.userData)}));toast("保存しました");updateSavePanel()}function loadGame(){const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;try{const d=JSON.parse(raw),w=worlds.find(x=>x[0]===d.world)||worlds[0];generateWorld(w);while(worldGroup.children.length)worldGroup.remove(worldGroup.children[0]);blocks.clear();d.blocks.forEach(b=>{const item=allItems.find(x=>x.id===b.itemId)||catalog.basic.items[0];addBlock(b.x,b.y,b.z,item)});Object.assign(player.pos,d.player);player.yaw=d.player.yaw;player.pitch=d.player.pitch;Object.assign(survival,d.survival);if(d.inventory)Object.assign(inventory,d.inventory);perspective=d.perspective||"first";d.hotbar?.forEach((id,i)=>{const item=allItems.find(x=>x.id===id);if(item)hotbar[i]=item});seedMobs();return true}catch{return false}}
     function start(load){if(!load||!loadGame())generateWorld(selectedWorld);$("#titleScreen").classList.add("hidden");$("#hud").classList.remove("hidden");$("#mobile").classList.remove("hidden");$("#realHands").classList.remove("hidden");applyPerspective();running=true;paused=false;renderHotbar();if(matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}
     $("#hitNew").onclick=()=>start(false);$("#hitContinue").onclick=()=>start(true);$("#hitWorld").onclick=()=>{renderWorlds();show("#worldOverlay")};$("#hitSettings").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#hitHow").onclick=()=>show("#helpOverlay");$("#hitCredits").onclick=()=>alert("REAL CRAFT / にちかゲームズ");
-    $("#openInventory").onclick=openInventoryUI;$("#openAttributes").onclick=()=>{renderAttributeGrid();show("#attributeOverlay")};$("#openCatalog").onclick=()=>{renderCatalog();show("#catalogOverlay")};$("#openBestiary").onclick=()=>{renderBestiary();show("#bestiaryOverlay")};$("#openSystems").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#openPause").onclick=()=>{paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()};
+    $("#openInventory").onclick=openInventoryUI;$("#openCatalog").onclick=()=>{renderCatalog();show("#catalogOverlay")};$("#openBestiary").onclick=()=>{renderBestiary();show("#bestiaryOverlay")};$("#openSystems").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#openPause").onclick=()=>{paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()};
     $("#resume").onclick=()=>{paused=false;$("#pauseOverlay").classList.add("hidden");renderer.domElement.requestPointerLock?.()};$("#save").onclick=saveGame;$("#pauseCatalog").onclick=()=>{renderCatalog();$("#pauseOverlay").classList.add("hidden");show("#catalogOverlay")};$("#pauseWorld").onclick=()=>{renderWorlds();$("#pauseOverlay").classList.add("hidden");show("#worldOverlay")};$("#toTitle").onclick=()=>{saveGame();running=false;paused=false;$("#pauseOverlay").classList.add("hidden");$("#hud").classList.add("hidden");$("#mobile").classList.add("hidden");$("#realHands").classList.add("hidden");$("#titleScreen").classList.remove("hidden")};
     addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});addEventListener("keydown",e=>{keys[e.code]=true;if(/^Digit[1-8]$/.test(e.code)){selectedSlot=Number(e.code.at(-1))-1;renderHotbar()}if(e.code==="Space")jump();if(e.code==="KeyF")attackMob();if(e.code==="KeyE")interact();if(e.code==="KeyI")openInventoryUI();if(e.code==="KeyV")toggleView();if(e.code==="KeyB"){renderCatalog();show("#catalogOverlay")}if(e.code==="KeyM"){renderBestiary();show("#bestiaryOverlay")}if(e.code==="Escape"&&running){paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()}});addEventListener("keyup",e=>keys[e.code]=false);
     addEventListener("mousemove",e=>{if(document.pointerLockElement!==renderer.domElement||paused)return;player.yaw-=e.movementX*.0024;player.pitch=THREE.MathUtils.clamp(player.pitch-e.movementY*.0024,-1.48,1.48)});renderer.domElement.addEventListener("click",()=>{if(running&&!paused&&matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()});renderer.domElement.addEventListener("mousedown",e=>{if(!running||paused||document.pointerLockElement!==renderer.domElement)return;if(e.button===0)startMine();if(e.button===2)placeBlock()});renderer.domElement.addEventListener("mouseup",e=>{if(e.button===0)stopMine()});renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
@@ -503,7 +623,7 @@
       sun.intensity=2.5+t*.9;hemi.intensity=1.05+t*.3
     }
     renderAttributeStrip();renderAttributeGrid();
-    function loop(now){requestAnimationFrame(loop);const dt=Math.min(.034,(now-last)/1000);last=now;if(running&&!paused){updatePlayer(dt);updateMobs(dt);updateCrops(dt);updateMining(dt);updateActionPrompt();updateHud();animateEnvironment(dt,now)}renderer.render(scene,camera)}renderHotbar();renderWorlds();renderCatalog();renderSystems();renderBestiary();requestAnimationFrame(loop);
+    function loop(now){requestAnimationFrame(loop);const dt=Math.min(.034,(now-last)/1000);last=now;if(running&&!paused){updatePlayer(dt);updateMobs(dt);updateCrops(dt);updateMining(dt);updateActionPrompt();updateHud();animateEnvironment(dt,now)}renderer.render(scene,camera)}renderHotbar();renderWorlds();renderCatalog();renderSystems();renderBestiary();setupTitleHover();updateSavePanel();requestAnimationFrame(loop);
   </script>
 </body>
 </html>
