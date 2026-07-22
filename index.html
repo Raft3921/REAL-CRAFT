@@ -173,26 +173,28 @@
     #roundGaugeInner{width:60px;height:60px;border-radius:50%;background:#101923;display:grid;place-items:center;font-weight:900}
     #attributeStrip{display:none!important}
 
+  
+    #titleScreen{position:fixed;inset:0;z-index:50;background:#000;display:grid;place-items:center;overflow:hidden}
+    #titleStage{position:relative;width:min(100vw,calc(100vh * 1.4375));aspect-ratio:1472/1024;background:url("./assets/title-full.jpg") center/100% 100% no-repeat}
+    #titleCursorArrow{position:absolute;width:34px;height:34px;z-index:6;pointer-events:none;transform:translate(7px,-4px) rotate(-10deg);filter:drop-shadow(0 0 8px rgba(255,221,94,.9))}
+    #titleCursorArrow:before{content:"";position:absolute;inset:0;clip-path:polygon(0 0,100% 50%,0 100%,24% 57%);background:linear-gradient(145deg,#fff6ad,#d99d16 72%)}
+    .title-zone{position:absolute;border:0;background:transparent;color:transparent;border-radius:10px;cursor:none}
+    .title-zone.hovering{outline:3px solid rgba(255,222,114,.72);background:rgba(255,222,114,.07)}
+    #zoneNew{left:3.3%;top:33.9%;width:21.9%;height:7.6%}#zoneContinue{left:3.3%;top:41.8%;width:21.9%;height:7.4%}#zoneWorld{left:3.3%;top:49.8%;width:21.9%;height:7.4%}#zoneSettings{left:3.3%;top:57.7%;width:21.9%;height:7.4%}#zoneHow{left:3.3%;top:65.7%;width:21.9%;height:7.4%}#zoneCredits{left:3.3%;top:73.6%;width:21.9%;height:7.4%}
+    #saveLive{right:2.6%;top:50.4%;width:18.7%;height:22.9%}#buildTag{right:1.5%;bottom:1.2%}#pcOnlyBadge{left:1.3%;bottom:1.2%}
+    #rightRealHand{right:-2.5%;transform:rotate(5deg)}
+    @keyframes handBreatheRight{0%,100%{transform:translateY(0) rotate(5deg)}50%{transform:translateY(5px) rotate(4deg)}}
+    #controlGuide{position:absolute;left:14px;bottom:14px;width:330px;padding:12px 14px;border-radius:15px;background:rgba(7,13,20,.74);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);font-size:12px;line-height:1.7;pointer-events:auto}
+    #controlGuide strong{color:#f1d995}#controlGuide button{margin-top:8px;width:100%}
+    #tutorialToast{position:absolute;left:50%;top:12%;transform:translateX(-50%);max-width:520px;background:rgba(6,12,19,.82);border:1px solid rgba(255,255,255,.16);border-radius:15px;padding:12px 16px;text-align:center;line-height:1.55;opacity:0;transition:.2s}#tutorialToast.show{opacity:1}
+
   </style>
 </head>
 <body>
-  <div id="titleScreen">
-    <button id="hitNew" class="title-hit" aria-label="はじめから"></button><button id="hitContinue" class="title-hit" aria-label="つづきから"></button>
-    <button id="hitWorld" class="title-hit" aria-label="ワールド選択"></button><button id="hitSettings" class="title-hit" aria-label="設定"></button>
-    <button id="hitHow" class="title-hit" aria-label="遊び方"></button><button id="hitCredits" class="title-hit" aria-label="クレジット"></button>
-    
-    <div id="titleArrow"></div>
-    <div id="saveLive">
-      <h3>最新のセーブデータ</h3>
-      <div id="saveThumbLive"></div>
-      <div id="saveLiveText" class="muted">セーブデータがありません。</div>
-    </div>
-    <div id="pcOnlyBadge">PC版 / WASD操作</div>
-
-    <div id="buildTag">BUILD 1.1 — PC専用・3Dモデル強化版</div>
-  </div>
-
-  <div id="worldOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>🌍 ワールド選択</h2><div style="opacity:.7">13種類の環境を選択できます。</div></div><button class="hudbtn close">閉じる</button></div><div id="worldGrid" class="world-grid"></div></div></div>
+  <div id="titleScreen"><div id="titleStage">
+<button id="zoneNew" class="title-zone" aria-label="はじめから"></button><button id="zoneContinue" class="title-zone" aria-label="つづきから"></button><button id="zoneWorld" class="title-zone" aria-label="ワールド選択"></button><button id="zoneSettings" class="title-zone" aria-label="設定"></button><button id="zoneHow" class="title-zone" aria-label="遊び方"></button><button id="zoneCredits" class="title-zone" aria-label="クレジット"></button>
+<div id="titleCursorArrow"></div><div id="saveLive"><h3>最新のセーブデータ</h3><div id="saveThumbLive"></div><div id="saveLiveText" class="muted">セーブデータがありません。</div></div><div id="pcOnlyBadge">PC版 / WASD操作</div><div id="buildTag">BUILD 1.2 — 操作・接地・チュートリアル修正版</div></div></div>
+<div id="worldOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>🌍 ワールド選択</h2><div style="opacity:.7">13種類の環境を選択できます。</div></div><button class="hudbtn close">閉じる</button></div><div id="worldGrid" class="world-grid"></div></div></div>
   <div id="catalogOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>REAL CRAFT カタログ</h2><div id="catalogCount" style="opacity:.7"></div></div><button class="hudbtn close">閉じる</button></div><div id="catalogTabs" class="tabs"></div><div id="catalogGrid" class="catalog-grid"></div></div></div>
   <div id="systemsOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>⚙️ システム</h2><div style="opacity:.7">今回の基礎実装と、今後の拡張対象を一覧化。</div></div><button class="hudbtn close">閉じる</button></div><div id="systemGrid" class="system-grid"></div></div></div>
   <div id="bestiaryOverlay" class="overlay hidden"><div class="panel"><div class="overlay-head"><div><h2>🐾 動物・モンスター</h2><div style="opacity:.7">現在のワールドへ召喚できます。</div></div><button class="hudbtn close">閉じる</button></div><div id="bestiaryGrid" class="bestiary-grid"></div></div></div>
@@ -244,13 +246,13 @@
       <div class="stat"><span>健康</span><div class="track"><div id="healthFill" class="fill"></div></div><span id="healthVal"></span></div>
     </div>
     <div id="topRight"><div class="titleRow"><span id="biomeName">草原</span><span id="levelText">Lv.1</span></div><div>経験値：<span id="xpText">0 / 100</span></div><div>属性：火1 / 水1 / 風1 / 土1 / 光1 / 闇1</div><div>周辺モブ：<span id="mobCount">0</span></div><div id="roundGauge"><div id="roundGaugeInner">100</div></div><div id="rightButtons"><button class="hudbtn" id="openInventory">所持品</button><button class="hudbtn" id="openCatalog">カタログ</button><button class="hudbtn" id="openBestiary">モブ</button><button class="hudbtn" id="openSystems">システム</button><button class="hudbtn" id="openPause">ポーズ</button></div></div>
-    <div id="toast"></div><div id="hotbarWrap"><div id="hint">破壊 / 設置 / 攻撃 / 視点変更が使用できます</div><div id="hotbar"></div></div>
+    <div id="toast"></div><div id="tutorialToast"></div><div id="controlGuide"><strong>基本操作</strong><br>W：前進　S：後退　A：左移動　D：右移動<br>マウス：視点　Space：ジャンプ　Shift：走る<br>左クリック長押し：ブロックを壊す・採掘<br>右クリック：選択中のブロックを置く<br>F：モブを攻撃　E：扉・設備・収納を使う<br>1〜8 / ホイール：ホットバー選択　I：持ち物<br>V：一人称／三人称　Esc：ポーズ<button class="hudbtn" id="hideGuide">説明を閉じる</button></div><div id="hotbarWrap"><div id="hint">破壊 / 設置 / 攻撃 / 視点変更が使用できます</div><div id="hotbar"></div></div>
   </div>
 
   
   <div id="realHands" class="hidden">
-    <img id="leftRealHand" class="realHand" src="./assets/ren-left-hand.png" alt="">
-    <img id="rightRealHand" class="realHand" src="./assets/ren-right-hand.png" alt="">
+    <img id="leftRealHand" class="realHand" src="./assets/ren-hand-left-v2.png" alt="">
+    <img id="rightRealHand" class="realHand" src="./assets/ren-hand-right-v2.png" alt="">
   </div>
 
   <div id="mobile" class="hidden" aria-hidden="true"><div id="lookZone"></div><div id="movePad"><div id="moveKnob"></div></div><button id="jump" class="action">跳</button><button id="break" class="action">壊</button><button id="place" class="action">置</button><button id="attack" class="action">攻</button><button id="view" class="action">視</button><button id="catalog" class="action">本</button><button id="menu" class="action">≡</button></div>
@@ -259,32 +261,10 @@
     import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js/+esm";
     const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],SAVE_KEY="real-craft-save-v11";
 
-    const titleArrow=$("#titleArrow");
-    const titleButtons=[
-      ["#hitNew",()=>start(false)],["#hitContinue",()=>start(true)],
-      ["#hitWorld",()=>{renderWorlds();show("#worldOverlay")}],
-      ["#hitSettings",()=>{renderSystems();show("#systemsOverlay")}],
-      ["#hitHow",()=>show("#helpOverlay")],["#hitCredits",()=>alert("REAL CRAFT / にちかゲームズ")]
-    ];
-    let hoverTimer=null;
-    function moveTitleArrowTo(btn){
-      const r=btn.getBoundingClientRect(),tr=$("#titleScreen").getBoundingClientRect();
-      titleArrow.style.left=`${r.left-tr.left+r.width-8}px`;
-      titleArrow.style.top=`${r.top-tr.top+r.height/2}px`;
-    }
-    function setupTitleHover(){
-      titleButtons.forEach(([sel,action])=>{
-        const btn=$(sel);
-        btn.addEventListener("pointerenter",()=>{
-          clearTimeout(hoverTimer);
-          titleButtons.forEach(([s])=>$(s).classList.remove("hovering"));
-          btn.classList.add("hovering");moveTitleArrowTo(btn);
-          hoverTimer=setTimeout(()=>{btn.classList.remove("hovering");action()},280);
-        });
-        btn.addEventListener("pointerleave",()=>{clearTimeout(hoverTimer);btn.classList.remove("hovering")});
-      });
-      moveTitleArrowTo($("#hitNew"));
-    }
+    const titleStage=$("#titleStage"),titleArrow=$("#titleCursorArrow");
+    const titleActions=[["#zoneNew",()=>start(false)],["#zoneContinue",()=>start(true)],["#zoneWorld",()=>{renderWorlds();show("#worldOverlay")}],["#zoneSettings",()=>{renderSystems();show("#systemsOverlay")}],["#zoneHow",()=>show("#helpOverlay")],["#zoneCredits",()=>alert("REAL CRAFT / にちかゲームズ")]];
+    let hoverTimer=null,lastHovered=null;
+    function setupTitleCursor(){titleStage.addEventListener("pointermove",e=>{const r=titleStage.getBoundingClientRect();titleArrow.style.left=`${e.clientX-r.left}px`;titleArrow.style.top=`${e.clientY-r.top}px`});titleStage.addEventListener("pointerenter",()=>titleArrow.style.display="block");titleStage.addEventListener("pointerleave",()=>{titleArrow.style.display="none";clearTimeout(hoverTimer)});titleActions.forEach(([sel,action])=>{const zone=$(sel);zone.addEventListener("pointerenter",()=>{clearTimeout(hoverTimer);lastHovered=zone;zone.classList.add("hovering");hoverTimer=setTimeout(()=>{if(lastHovered===zone)action()},220)});zone.addEventListener("pointerleave",()=>{clearTimeout(hoverTimer);lastHovered=null;zone.classList.remove("hovering")});zone.addEventListener("click",action)})}
     function updateSavePanel(){
       const raw=localStorage.getItem(SAVE_KEY),box=$("#saveLiveText");
       if(!raw){box.innerHTML="セーブデータがありません。<br>「はじめから」で新しい世界を作成できます。";return}
@@ -477,12 +457,13 @@
     }
 
     function spawnMob(name,hostile=false,x=(Math.random()-.5)*22,z=(Math.random()-.5)*22){const g=model(name,hostile);g.position.set(x,4,z);mobGroup.add(g);mobs.push(g)}function seedMobs(){const f=[...domestic,...wild],e=[...normalMonsters,...eliteMonsters];for(let i=0;i<8;i++)spawnMob(f[(Math.random()*f.length)|0]);for(let i=0;i<5;i++)spawnMob(e[(Math.random()*e.length)|0],true);spawnElementSlime(attributes15.find(a=>a.id===survival.selectedAttribute)||attributes15[0]);for(let i=0;i<2;i++)spawnElementSlime(attributes15[(Math.random()*attributes15.length)|0])}
+    function groundYAtWorld(x,z){let top=-6;const rx=Math.round(x),rz=Math.round(z);for(let y=20;y>=-5;y--){if(blocks.has(k(rx,y,rz))){top=y;break}}return top+1.05}
     function updateMobs(dt){for(const m of mobs){const u=m.userData;u.phase+=dt;if(Math.random()<.006)u.dir+=(Math.random()-.5)*1.5;if(u.hostile){
         const dx=player.pos.x-m.position.x,dz=player.pos.z-m.position.z,dist=Math.hypot(dx,dz);
         if(dist<9){u.dir=Math.atan2(dz,dx);u.speed=.72;if(dist<1.45&&Math.random()<dt*.65){survival.life=Math.max(0,survival.life-4);toast(`${u.name}の攻撃！`)}}
         else u.speed=.32
       }
-      m.position.x+=Math.cos(u.dir)*u.speed*dt;m.position.z+=Math.sin(u.dir)*u.speed*dt;m.position.y=4+Math.sin(u.phase*2)*.08;if(!m.children.some(c=>c.isSprite))m.rotation.y=-u.dir+Math.PI/2}$("#mobCount").textContent=mobs.length}
+      m.position.x+=Math.cos(u.dir)*u.speed*dt;m.position.z+=Math.sin(u.dir)*u.speed*dt;const gy=groundYAtWorld(m.position.x,m.position.z);m.position.y=THREE.MathUtils.lerp(m.position.y,gy+Math.sin(u.phase*2)*.035,Math.min(1,dt*8));if(!m.children.some(c=>c.isSprite))m.rotation.y=-u.dir+Math.PI/2}$("#mobCount").textContent=mobs.length}
     
     const renModel=new THREE.Group();
     function addPart(geo,mat,pos,scale=[1,1,1],rot=[0,0,0]){
@@ -527,8 +508,8 @@
     }
     function updateActionPrompt(){
       const t=targetInfo(),p=$("#actionPrompt");
-      if(t.mob){let r=t.mob.object;while(r.parent&&r.parent!==mobGroup)r=r.parent;p.textContent=`F：${r.userData.name}を攻撃`;p.classList.add("show");return}
-      if(t.block){const item=allItems.find(x=>x.id===t.block.object.userData.itemId);p.textContent=item?.name.includes("扉")?"E：扉を開閉":(["作業台","かまど","料理台","魔法祭壇"].some(n=>item?.name.includes(n))?"E：設備を使用":`長押し：${item?.name||"ブロック"}を採掘`);p.classList.add("show");return}
+      if(t.mob){let r=t.mob.object;while(r.parent&&r.parent!==mobGroup)r=r.parent;p.textContent=`F：${r.userData.name}を攻撃（十字線を合わせる）`;p.classList.add("show");return}
+      if(t.block){const item=allItems.find(x=>x.id===t.block.object.userData.itemId);p.textContent=item?.name.includes("扉")?"E：扉を開閉":(["作業台","かまど","料理台","魔法祭壇"].some(n=>item?.name.includes(n))?"E：設備を使用":`左クリック長押し：${item?.name||"ブロック"}を壊す`);p.classList.add("show");return}
       p.classList.remove("show")
     }
     function interact(){
@@ -597,11 +578,11 @@
     function renderBestiary(){const g=$("#bestiaryGrid");g.innerHTML="";const e=[...domestic.map(n=>[n,false,"家畜"]),...wild.map(n=>[n,false,"野生"]),...normalMonsters.map(n=>[n,true,"通常モンスター"]),...eliteMonsters.map(n=>[n,true,"上位種"])];e.forEach(([n,h,k])=>{const b=document.createElement("button");b.className="mob-card";b.innerHTML=`<strong>${n}</strong><small>${k} / タップで現在地付近へ召喚</small>`;b.onclick=()=>{spawnMob(n,h,player.pos.x+3+Math.random()*3,player.pos.z+3+Math.random()*3);toast(`${n}を召喚`)};g.appendChild(b)})}
     function show(s){$(s).classList.remove("hidden");paused=true;document.exitPointerLock?.()}function hide(s){$(s).classList.add("hidden");paused=false;if(running&&matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}$$(".overlay .close").forEach(b=>b.onclick=()=>hide("#"+b.closest(".overlay").id));$$("#attributeModeTabs .tab").forEach(b=>b.onclick=()=>{$$("#attributeModeTabs .tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");attributeMode=b.dataset.mode;renderAttributeGrid()});
     function saveGame(){localStorage.setItem(SAVE_KEY,JSON.stringify({savedAt:new Date().toLocaleString("ja-JP"),world:selectedWorld[0],player:{x:player.pos.x,y:player.pos.y,z:player.pos.z,yaw:player.yaw,pitch:player.pitch},survival,perspective,hotbar:hotbar.map(x=>x.id),inventory,blocks:[...blocks.values()].map(x=>x.userData)}));toast("保存しました");updateSavePanel()}function loadGame(){const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;try{const d=JSON.parse(raw),w=worlds.find(x=>x[0]===d.world)||worlds[0];generateWorld(w);while(worldGroup.children.length)worldGroup.remove(worldGroup.children[0]);blocks.clear();d.blocks.forEach(b=>{const item=allItems.find(x=>x.id===b.itemId)||catalog.basic.items[0];addBlock(b.x,b.y,b.z,item)});Object.assign(player.pos,d.player);player.yaw=d.player.yaw;player.pitch=d.player.pitch;Object.assign(survival,d.survival);if(d.inventory)Object.assign(inventory,d.inventory);perspective=d.perspective||"first";d.hotbar?.forEach((id,i)=>{const item=allItems.find(x=>x.id===id);if(item)hotbar[i]=item});seedMobs();return true}catch{return false}}
-    function start(load){if(!load||!loadGame())generateWorld(selectedWorld);$("#titleScreen").classList.add("hidden");$("#hud").classList.remove("hidden");$("#mobile").classList.remove("hidden");$("#realHands").classList.remove("hidden");applyPerspective();running=true;paused=false;renderHotbar();if(matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}
-    $("#hitNew").onclick=()=>start(false);$("#hitContinue").onclick=()=>start(true);$("#hitWorld").onclick=()=>{renderWorlds();show("#worldOverlay")};$("#hitSettings").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#hitHow").onclick=()=>show("#helpOverlay");$("#hitCredits").onclick=()=>alert("REAL CRAFT / にちかゲームズ");
+    function start(load){if(!load||!loadGame())generateWorld(selectedWorld);$("#titleScreen").classList.add("hidden");$("#hud").classList.remove("hidden");$("#mobile").classList.remove("hidden");$("#realHands").classList.remove("hidden");applyPerspective();running=true;paused=false;renderHotbar();showTutorialStep(0);if(matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()}
+    
     $("#openInventory").onclick=openInventoryUI;$("#openCatalog").onclick=()=>{renderCatalog();show("#catalogOverlay")};$("#openBestiary").onclick=()=>{renderBestiary();show("#bestiaryOverlay")};$("#openSystems").onclick=()=>{renderSystems();show("#systemsOverlay")};$("#openPause").onclick=()=>{paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()};
     $("#resume").onclick=()=>{paused=false;$("#pauseOverlay").classList.add("hidden");renderer.domElement.requestPointerLock?.()};$("#save").onclick=saveGame;$("#pauseCatalog").onclick=()=>{renderCatalog();$("#pauseOverlay").classList.add("hidden");show("#catalogOverlay")};$("#pauseWorld").onclick=()=>{renderWorlds();$("#pauseOverlay").classList.add("hidden");show("#worldOverlay")};$("#toTitle").onclick=()=>{saveGame();running=false;paused=false;$("#pauseOverlay").classList.add("hidden");$("#hud").classList.add("hidden");$("#mobile").classList.add("hidden");$("#realHands").classList.add("hidden");$("#titleScreen").classList.remove("hidden")};
-    addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});addEventListener("keydown",e=>{keys[e.code]=true;if(/^Digit[1-8]$/.test(e.code)){selectedSlot=Number(e.code.at(-1))-1;renderHotbar()}if(e.code==="Space")jump();if(e.code==="KeyF")attackMob();if(e.code==="KeyE")interact();if(e.code==="KeyI")openInventoryUI();if(e.code==="KeyV")toggleView();if(e.code==="KeyB"){renderCatalog();show("#catalogOverlay")}if(e.code==="KeyM"){renderBestiary();show("#bestiaryOverlay")}if(e.code==="Escape"&&running){paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()}});addEventListener("keyup",e=>keys[e.code]=false);
+    addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});addEventListener("keydown",e=>{keys[e.code]=true;if(/^Digit[1-8]$/.test(e.code)){selectedSlot=Number(e.code.at(-1))-1;renderHotbar()}if(e.code==="Space")jump();if(e.code==="KeyF")attackMob();if(e.code==="KeyE")interact();if(e.code==="KeyI")openInventoryUI();if(e.code==="KeyV")toggleView();if(e.code==="KeyB"){renderCatalog();show("#catalogOverlay")}if(e.code==="KeyM"){renderBestiary();show("#bestiaryOverlay")}if(e.code==="Escape"&&running){paused=true;$("#pauseOverlay").classList.remove("hidden");document.exitPointerLock?.()}});addEventListener("keyup",e=>keys[e.code]=false);addEventListener("wheel",e=>{if(!running||paused)return;selectedSlot=(selectedSlot+(e.deltaY>0?1:-1)+hotbar.length)%hotbar.length;renderHotbar()},{passive:true});$("#hideGuide").onclick=()=>$("#controlGuide").classList.add("hidden");
     addEventListener("mousemove",e=>{if(document.pointerLockElement!==renderer.domElement||paused)return;player.yaw-=e.movementX*.0024;player.pitch=THREE.MathUtils.clamp(player.pitch-e.movementY*.0024,-1.48,1.48)});renderer.domElement.addEventListener("click",()=>{if(running&&!paused&&matchMedia("(pointer:fine)").matches)renderer.domElement.requestPointerLock?.()});renderer.domElement.addEventListener("mousedown",e=>{if(!running||paused||document.pointerLockElement!==renderer.domElement)return;if(e.button===0)startMine();if(e.button===2)placeBlock()});renderer.domElement.addEventListener("mouseup",e=>{if(e.button===0)stopMine()});renderer.domElement.addEventListener("contextmenu",e=>e.preventDefault());
     $("#jump").onpointerdown=jump;$("#break").onpointerdown=startMine;$("#break").onpointerup=stopMine;$("#break").onpointercancel=stopMine;$("#place").onpointerdown=placeBlock;$("#attack").onpointerdown=attackMob;$("#view").onpointerdown=toggleView;$("#catalog").onpointerdown=()=>{renderCatalog();show("#catalogOverlay")};$("#menu").onpointerdown=()=>{$("#pauseOverlay").classList.remove("hidden");paused=true};
     const look=$("#lookZone");let lid=null,lx=0,ly=0;look.onpointerdown=e=>{lid=e.pointerId;lx=e.clientX;ly=e.clientY;look.setPointerCapture(lid)};look.onpointermove=e=>{if(e.pointerId!==lid||paused)return;const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;player.yaw-=dx*.006;player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.006,-1.48,1.48)};look.onpointerup=e=>{if(e.pointerId===lid)lid=null};
@@ -623,7 +604,8 @@
       sun.intensity=2.5+t*.9;hemi.intensity=1.05+t*.3
     }
     renderAttributeStrip();renderAttributeGrid();
-    function loop(now){requestAnimationFrame(loop);const dt=Math.min(.034,(now-last)/1000);last=now;if(running&&!paused){updatePlayer(dt);updateMobs(dt);updateCrops(dt);updateMining(dt);updateActionPrompt();updateHud();animateEnvironment(dt,now)}renderer.render(scene,camera)}renderHotbar();renderWorlds();renderCatalog();renderSystems();renderBestiary();setupTitleHover();updateSavePanel();requestAnimationFrame(loop);
+    let tutorialStep=0;const tutorialMessages=["W・A・S・Dで移動してください。Wが前、Sが後ろ、Aが左、Dが右です。","木や石へ十字線を合わせ、左クリックを長押しすると採掘できます。","ホットバーでブロックを選び、地面に十字線を合わせて右クリックすると置けます。","モブへ十字線を合わせてFキーを押すと攻撃できます。","扉・作業台・収納へ十字線を合わせてEキーを押すと使用できます。"];function showTutorialStep(i){tutorialStep=Math.max(0,Math.min(tutorialMessages.length-1,i));const t=$("#tutorialToast");t.textContent=tutorialMessages[tutorialStep];t.classList.add("show");clearTimeout(showTutorialStep.timer);showTutorialStep.timer=setTimeout(()=>t.classList.remove("show"),5200)}
+    function loop(now){requestAnimationFrame(loop);const dt=Math.min(.034,(now-last)/1000);last=now;if(running&&!paused){updatePlayer(dt);updateMobs(dt);updateCrops(dt);updateMining(dt);updateActionPrompt();updateHud();animateEnvironment(dt,now)}renderer.render(scene,camera)}renderHotbar();renderWorlds();renderCatalog();renderSystems();renderBestiary();setupTitleCursor();updateSavePanel();requestAnimationFrame(loop);
   </script>
 </body>
 </html>
